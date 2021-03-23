@@ -1,0 +1,649 @@
+
+macro boolean fregfile_blackboxing :=
+  soc1/core/fp_pipeline/fregfile/io_read_ports_0_data == soc2/core/fp_pipeline/fregfile/io_read_ports_0_data &&
+  soc1/core/fp_pipeline/fregfile/io_read_ports_1_data == soc2/core/fp_pipeline/fregfile/io_read_ports_1_data &&
+  soc1/core/fp_pipeline/fregfile/io_read_ports_2_data == soc2/core/fp_pipeline/fregfile/io_read_ports_2_data;
+end macro;
+
+
+macro boolean fregfile_blackboxing_soundness :=
+  soc1/core/fp_pipeline/fregfile/io_read_ports_0_addr == soc2/core/fp_pipeline/fregfile/io_read_ports_0_addr &&
+  soc1/core/fp_pipeline/fregfile/io_read_ports_1_addr == soc2/core/fp_pipeline/fregfile/io_read_ports_1_addr &&
+  soc1/core/fp_pipeline/fregfile/io_read_ports_2_addr == soc2/core/fp_pipeline/fregfile/io_read_ports_2_addr &&
+  soc1/core/fp_pipeline/fregfile/io_write_ports_0_valid == soc2/core/fp_pipeline/fregfile/io_write_ports_0_valid &&
+  soc1/core/fp_pipeline/fregfile/io_write_ports_0_bits_addr == soc2/core/fp_pipeline/fregfile/io_write_ports_0_bits_addr &&
+  soc1/core/fp_pipeline/fregfile/io_write_ports_0_bits_data == soc2/core/fp_pipeline/fregfile/io_write_ports_0_bits_data &&
+  soc1/core/fp_pipeline/fregfile/io_write_ports_1_valid == soc2/core/fp_pipeline/fregfile/io_write_ports_1_valid &&
+  soc1/core/fp_pipeline/fregfile/io_write_ports_1_bits_addr == soc2/core/fp_pipeline/fregfile/io_write_ports_1_bits_addr &&
+  soc1/core/fp_pipeline/fregfile/io_write_ports_1_bits_data == soc2/core/fp_pipeline/fregfile/io_write_ports_1_bits_data;
+end macro;
+
+
+macro boolean iregfile_blackboxing :=
+  soc1/core/iregfile/io_read_ports_0_data == soc2/core/iregfile/io_read_ports_0_data &&
+  soc1/core/iregfile/io_read_ports_1_data == soc2/core/iregfile/io_read_ports_1_data &&
+  soc1/core/iregfile/io_read_ports_2_data == soc2/core/iregfile/io_read_ports_2_data &&
+  soc1/core/iregfile/io_read_ports_3_data == soc2/core/iregfile/io_read_ports_3_data &&
+  soc1/core/iregfile/io_read_ports_4_data == soc2/core/iregfile/io_read_ports_4_data &&
+  soc1/core/iregfile/io_read_ports_5_data == soc2/core/iregfile/io_read_ports_5_data;
+end macro;
+
+
+macro boolean iregfile_blackboxing_soundness :=
+  soc1/core/iregfile/io_read_ports_0_addr == soc2/core/iregfile/io_read_ports_0_addr &&
+  soc1/core/iregfile/io_read_ports_1_addr == soc2/core/iregfile/io_read_ports_1_addr &&
+  soc1/core/iregfile/io_read_ports_2_addr == soc2/core/iregfile/io_read_ports_2_addr &&
+  soc1/core/iregfile/io_read_ports_3_addr == soc2/core/iregfile/io_read_ports_3_addr &&
+  soc1/core/iregfile/io_read_ports_4_addr == soc2/core/iregfile/io_read_ports_4_addr &&
+  soc1/core/iregfile/io_read_ports_5_addr == soc2/core/iregfile/io_read_ports_5_addr &&
+  soc1/core/iregfile/io_write_ports_0_valid == soc2/core/iregfile/io_write_ports_0_valid &&
+  soc1/core/iregfile/io_write_ports_0_bits_addr == soc2/core/iregfile/io_write_ports_0_bits_addr &&
+  soc1/core/iregfile/io_write_ports_0_bits_data == soc2/core/iregfile/io_write_ports_0_bits_data &&
+  soc1/core/iregfile/io_write_ports_1_valid == soc2/core/iregfile/io_write_ports_1_valid &&
+  soc1/core/iregfile/io_write_ports_1_bits_addr == soc2/core/iregfile/io_write_ports_1_bits_addr &&
+  soc1/core/iregfile/io_write_ports_1_bits_data == soc2/core/iregfile/io_write_ports_1_bits_data &&
+  soc1/core/iregfile/io_write_ports_2_valid == soc2/core/iregfile/io_write_ports_2_valid &&
+  soc1/core/iregfile/io_write_ports_2_bits_addr == soc2/core/iregfile/io_write_ports_2_bits_addr &&
+  soc1/core/iregfile/io_write_ports_2_bits_data == soc2/core/iregfile/io_write_ports_2_bits_data;
+end macro;
+
+
+macro boolean data_blackboxing :=
+  (soc1/dcache/data/io_resp_0_0 == soc2/dcache/data/io_resp_0_0 || soc1/dcache/meta_0/io_resp_0_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_0_tag == SECRET_TAG) &&
+  (soc1/dcache/data/io_resp_0_1 == soc2/dcache/data/io_resp_0_1 || soc1/dcache/meta_0/io_resp_1_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_1_tag == SECRET_TAG) &&
+  (soc1/dcache/data/io_resp_0_2 == soc2/dcache/data/io_resp_0_2 || soc1/dcache/meta_0/io_resp_2_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_2_tag == SECRET_TAG) &&
+  (soc1/dcache/data/io_resp_0_3 == soc2/dcache/data/io_resp_0_3 || soc1/dcache/meta_0/io_resp_3_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_3_tag == SECRET_TAG);
+end macro;
+
+
+macro boolean data_blackboxing_soundness :=
+  soc1/dcache/data/io_read_0_valid == soc2/dcache/data/io_read_0_valid &&
+  soc1/dcache/data/io_read_0_bits_way_en == soc2/dcache/data/io_read_0_bits_way_en &&
+  soc1/dcache/data/io_read_0_bits_addr == soc2/dcache/data/io_read_0_bits_addr &&
+  soc1/dcache/data/io_write_valid == soc2/dcache/data/io_write_valid &&
+  soc1/dcache/data/io_write_bits_way_en == soc2/dcache/data/io_write_bits_way_en &&
+  soc1/dcache/data/io_write_bits_addr == soc2/dcache/data/io_write_bits_addr &&
+  soc1/dcache/data/io_write_bits_wmask == soc2/dcache/data/io_write_bits_wmask &&
+  soc1/dcache/data/io_write_bits_data == soc2/dcache/data/io_write_bits_data;
+end macro;
+
+
+macro boolean meta_0_blackboxing :=
+  soc1/dcache/meta_0/io_read_ready == soc2/dcache/meta_0/io_read_ready &&
+  soc1/dcache/meta_0/io_write_ready == soc2/dcache/meta_0/io_write_ready &&
+  soc1/dcache/meta_0/io_resp_0_coh_state == soc2/dcache/meta_0/io_resp_0_coh_state &&
+  soc1/dcache/meta_0/io_resp_0_tag == soc2/dcache/meta_0/io_resp_0_tag &&
+  soc1/dcache/meta_0/io_resp_1_coh_state == soc2/dcache/meta_0/io_resp_1_coh_state &&
+  soc1/dcache/meta_0/io_resp_1_tag == soc2/dcache/meta_0/io_resp_1_tag &&
+  soc1/dcache/meta_0/io_resp_2_coh_state == soc2/dcache/meta_0/io_resp_2_coh_state &&
+  soc1/dcache/meta_0/io_resp_2_tag == soc2/dcache/meta_0/io_resp_2_tag &&
+  soc1/dcache/meta_0/io_resp_3_coh_state == soc2/dcache/meta_0/io_resp_3_coh_state &&
+  soc1/dcache/meta_0/io_resp_3_tag == soc2/dcache/meta_0/io_resp_3_tag;
+end macro;
+
+
+macro boolean meta_0_blackboxing_soundness :=
+  soc1/dcache/meta_0/io_read_valid == soc2/dcache/meta_0/io_read_valid &&
+  soc1/dcache/meta_0/io_read_bits_idx == soc2/dcache/meta_0/io_read_bits_idx &&
+  soc1/dcache/meta_0/io_write_valid == soc2/dcache/meta_0/io_write_valid &&
+  soc1/dcache/meta_0/io_write_bits_idx == soc2/dcache/meta_0/io_write_bits_idx &&
+  soc1/dcache/meta_0/io_write_bits_way_en == soc2/dcache/meta_0/io_write_bits_way_en &&
+  soc1/dcache/meta_0/io_write_bits_data_coh_state == soc2/dcache/meta_0/io_write_bits_data_coh_state &&
+  soc1/dcache/meta_0/io_write_bits_data_tag == soc2/dcache/meta_0/io_write_bits_data_tag;
+end macro;
+
+
+macro boolean banked_predictors_0_blackboxing :=
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_0_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_0_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_0_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_0_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_0_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_0_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_0_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_0_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_0_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_0_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_1_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_1_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_1_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_1_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_1_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_1_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_1_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_1_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_1_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_1_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_2_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_2_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_2_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_2_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_2_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_2_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_2_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_2_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_2_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_2_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_3_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_3_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_3_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_3_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_3_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_3_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_3_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_3_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f1_3_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f1_3_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_0_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_0_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_0_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_0_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_0_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_0_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_0_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_0_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_0_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_0_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_1_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_1_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_1_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_1_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_1_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_1_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_1_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_1_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_1_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_1_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_2_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_2_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_2_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_2_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_2_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_2_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_2_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_2_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_2_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_2_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_3_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_3_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_3_is_br == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_3_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_3_is_jal == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_3_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_3_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_3_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f2_3_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f2_3_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_0_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_0_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_0_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_0_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_0_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_0_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_1_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_1_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_1_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_1_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_1_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_1_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_2_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_2_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_2_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_2_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_2_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_2_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_3_taken == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_3_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_3_predicted_pc_valid == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_3_predicted_pc_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_resp_f3_3_predicted_pc_bits == soc2/frontend/bpd/banked_predictors_0/io_resp_f3_3_predicted_pc_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_f3_meta == soc2/frontend/bpd/banked_predictors_0/io_f3_meta;
+end macro;
+
+
+macro boolean banked_predictors_0_blackboxing_soundness :=
+  soc1/frontend/bpd/banked_predictors_0/io_f0_valid == soc2/frontend/bpd/banked_predictors_0/io_f0_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_f0_pc == soc2/frontend/bpd/banked_predictors_0/io_f0_pc &&
+  soc1/frontend/bpd/banked_predictors_0/io_f0_mask == soc2/frontend/bpd/banked_predictors_0/io_f0_mask &&
+  soc1/frontend/bpd/banked_predictors_0/io_f1_ghist == soc2/frontend/bpd/banked_predictors_0/io_f1_ghist &&
+  soc1/frontend/bpd/banked_predictors_0/io_f3_fire == soc2/frontend/bpd/banked_predictors_0/io_f3_fire &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_valid == soc2/frontend/bpd/banked_predictors_0/io_update_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_is_mispredict_update == soc2/frontend/bpd/banked_predictors_0/io_update_bits_is_mispredict_update &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_is_repair_update == soc2/frontend/bpd/banked_predictors_0/io_update_bits_is_repair_update &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_btb_mispredicts == soc2/frontend/bpd/banked_predictors_0/io_update_bits_btb_mispredicts &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_pc == soc2/frontend/bpd/banked_predictors_0/io_update_bits_pc &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_br_mask == soc2/frontend/bpd/banked_predictors_0/io_update_bits_br_mask &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_cfi_idx_valid == soc2/frontend/bpd/banked_predictors_0/io_update_bits_cfi_idx_valid &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_cfi_idx_bits == soc2/frontend/bpd/banked_predictors_0/io_update_bits_cfi_idx_bits &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_cfi_taken == soc2/frontend/bpd/banked_predictors_0/io_update_bits_cfi_taken &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_cfi_mispredicted == soc2/frontend/bpd/banked_predictors_0/io_update_bits_cfi_mispredicted &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_cfi_is_br == soc2/frontend/bpd/banked_predictors_0/io_update_bits_cfi_is_br &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_cfi_is_jal == soc2/frontend/bpd/banked_predictors_0/io_update_bits_cfi_is_jal &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_ghist == soc2/frontend/bpd/banked_predictors_0/io_update_bits_ghist &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_target == soc2/frontend/bpd/banked_predictors_0/io_update_bits_target &&
+  soc1/frontend/bpd/banked_predictors_0/io_update_bits_meta == soc2/frontend/bpd/banked_predictors_0/io_update_bits_meta;
+end macro;
+
+
+macro boolean fb_blackboxing :=
+  soc1/frontend/fb/io_enq_ready == soc2/frontend/fb/io_enq_ready &&
+  soc1/frontend/fb/io_deq_valid == soc2/frontend/fb/io_deq_valid &&
+  soc1/frontend/fb/io_deq_bits_uops_0_valid == soc2/frontend/fb/io_deq_bits_uops_0_valid &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_inst == soc2/frontend/fb/io_deq_bits_uops_0_bits_inst &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_debug_inst == soc2/frontend/fb/io_deq_bits_uops_0_bits_debug_inst &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_is_rvc == soc2/frontend/fb/io_deq_bits_uops_0_bits_is_rvc &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_debug_pc == soc2/frontend/fb/io_deq_bits_uops_0_bits_debug_pc &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_br_type == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_br_type &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_op1_sel == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_op1_sel &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_op2_sel == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_op2_sel &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_imm_sel == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_imm_sel &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_op_fcn == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_op_fcn &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_fcn_dw == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_fcn_dw &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_csr_cmd == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_csr_cmd &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_is_load == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_is_load &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_is_sta == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_is_sta &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ctrl_is_std == soc2/frontend/fb/io_deq_bits_uops_0_bits_ctrl_is_std &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_iw_state == soc2/frontend/fb/io_deq_bits_uops_0_bits_iw_state &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_iw_p1_poisoned == soc2/frontend/fb/io_deq_bits_uops_0_bits_iw_p1_poisoned &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_iw_p2_poisoned == soc2/frontend/fb/io_deq_bits_uops_0_bits_iw_p2_poisoned &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_is_sfb == soc2/frontend/fb/io_deq_bits_uops_0_bits_is_sfb &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_ftq_idx == soc2/frontend/fb/io_deq_bits_uops_0_bits_ftq_idx &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_edge_inst == soc2/frontend/fb/io_deq_bits_uops_0_bits_edge_inst &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_pc_lob == soc2/frontend/fb/io_deq_bits_uops_0_bits_pc_lob &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_taken == soc2/frontend/fb/io_deq_bits_uops_0_bits_taken &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_csr_addr == soc2/frontend/fb/io_deq_bits_uops_0_bits_csr_addr &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_rxq_idx == soc2/frontend/fb/io_deq_bits_uops_0_bits_rxq_idx &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_xcpt_pf_if == soc2/frontend/fb/io_deq_bits_uops_0_bits_xcpt_pf_if &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_xcpt_ae_if == soc2/frontend/fb/io_deq_bits_uops_0_bits_xcpt_ae_if &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_xcpt_ma_if == soc2/frontend/fb/io_deq_bits_uops_0_bits_xcpt_ma_if &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_bp_debug_if == soc2/frontend/fb/io_deq_bits_uops_0_bits_bp_debug_if &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_bp_xcpt_if == soc2/frontend/fb/io_deq_bits_uops_0_bits_bp_xcpt_if &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_debug_fsrc == soc2/frontend/fb/io_deq_bits_uops_0_bits_debug_fsrc &&
+  soc1/frontend/fb/io_deq_bits_uops_0_bits_debug_tsrc == soc2/frontend/fb/io_deq_bits_uops_0_bits_debug_tsrc &&
+  soc1/frontend/fb/io_deq_bits_uops_1_valid == soc2/frontend/fb/io_deq_bits_uops_1_valid &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_inst == soc2/frontend/fb/io_deq_bits_uops_1_bits_inst &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_debug_inst == soc2/frontend/fb/io_deq_bits_uops_1_bits_debug_inst &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_is_rvc == soc2/frontend/fb/io_deq_bits_uops_1_bits_is_rvc &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_debug_pc == soc2/frontend/fb/io_deq_bits_uops_1_bits_debug_pc &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_br_type == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_br_type &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_op1_sel == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_op1_sel &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_op2_sel == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_op2_sel &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_imm_sel == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_imm_sel &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_op_fcn == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_op_fcn &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_fcn_dw == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_fcn_dw &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_csr_cmd == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_csr_cmd &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_is_load == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_is_load &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_is_sta == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_is_sta &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ctrl_is_std == soc2/frontend/fb/io_deq_bits_uops_1_bits_ctrl_is_std &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_iw_state == soc2/frontend/fb/io_deq_bits_uops_1_bits_iw_state &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_iw_p1_poisoned == soc2/frontend/fb/io_deq_bits_uops_1_bits_iw_p1_poisoned &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_iw_p2_poisoned == soc2/frontend/fb/io_deq_bits_uops_1_bits_iw_p2_poisoned &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_is_sfb == soc2/frontend/fb/io_deq_bits_uops_1_bits_is_sfb &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_ftq_idx == soc2/frontend/fb/io_deq_bits_uops_1_bits_ftq_idx &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_edge_inst == soc2/frontend/fb/io_deq_bits_uops_1_bits_edge_inst &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_pc_lob == soc2/frontend/fb/io_deq_bits_uops_1_bits_pc_lob &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_taken == soc2/frontend/fb/io_deq_bits_uops_1_bits_taken &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_csr_addr == soc2/frontend/fb/io_deq_bits_uops_1_bits_csr_addr &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_rxq_idx == soc2/frontend/fb/io_deq_bits_uops_1_bits_rxq_idx &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_xcpt_pf_if == soc2/frontend/fb/io_deq_bits_uops_1_bits_xcpt_pf_if &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_xcpt_ae_if == soc2/frontend/fb/io_deq_bits_uops_1_bits_xcpt_ae_if &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_xcpt_ma_if == soc2/frontend/fb/io_deq_bits_uops_1_bits_xcpt_ma_if &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_bp_debug_if == soc2/frontend/fb/io_deq_bits_uops_1_bits_bp_debug_if &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_bp_xcpt_if == soc2/frontend/fb/io_deq_bits_uops_1_bits_bp_xcpt_if &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_debug_fsrc == soc2/frontend/fb/io_deq_bits_uops_1_bits_debug_fsrc &&
+  soc1/frontend/fb/io_deq_bits_uops_1_bits_debug_tsrc == soc2/frontend/fb/io_deq_bits_uops_1_bits_debug_tsrc;
+end macro;
+
+
+macro boolean fb_blackboxing_soundness :=
+  soc1/frontend/fb/io_enq_valid == soc2/frontend/fb/io_enq_valid &&
+  soc1/frontend/fb/io_enq_bits_pc == soc2/frontend/fb/io_enq_bits_pc &&
+  soc1/frontend/fb/io_enq_bits_edge_inst_0 == soc2/frontend/fb/io_enq_bits_edge_inst_0 &&
+  soc1/frontend/fb/io_enq_bits_insts_0 == soc2/frontend/fb/io_enq_bits_insts_0 &&
+  soc1/frontend/fb/io_enq_bits_insts_1 == soc2/frontend/fb/io_enq_bits_insts_1 &&
+  soc1/frontend/fb/io_enq_bits_insts_2 == soc2/frontend/fb/io_enq_bits_insts_2 &&
+  soc1/frontend/fb/io_enq_bits_insts_3 == soc2/frontend/fb/io_enq_bits_insts_3 &&
+  soc1/frontend/fb/io_enq_bits_exp_insts_0 == soc2/frontend/fb/io_enq_bits_exp_insts_0 &&
+  soc1/frontend/fb/io_enq_bits_exp_insts_1 == soc2/frontend/fb/io_enq_bits_exp_insts_1 &&
+  soc1/frontend/fb/io_enq_bits_exp_insts_2 == soc2/frontend/fb/io_enq_bits_exp_insts_2 &&
+  soc1/frontend/fb/io_enq_bits_exp_insts_3 == soc2/frontend/fb/io_enq_bits_exp_insts_3 &&
+  soc1/frontend/fb/io_enq_bits_shadowed_mask_0 == soc2/frontend/fb/io_enq_bits_shadowed_mask_0 &&
+  soc1/frontend/fb/io_enq_bits_shadowed_mask_1 == soc2/frontend/fb/io_enq_bits_shadowed_mask_1 &&
+  soc1/frontend/fb/io_enq_bits_shadowed_mask_2 == soc2/frontend/fb/io_enq_bits_shadowed_mask_2 &&
+  soc1/frontend/fb/io_enq_bits_shadowed_mask_3 == soc2/frontend/fb/io_enq_bits_shadowed_mask_3 &&
+  soc1/frontend/fb/io_enq_bits_cfi_idx_valid == soc2/frontend/fb/io_enq_bits_cfi_idx_valid &&
+  soc1/frontend/fb/io_enq_bits_cfi_idx_bits == soc2/frontend/fb/io_enq_bits_cfi_idx_bits &&
+  soc1/frontend/fb/io_enq_bits_ftq_idx == soc2/frontend/fb/io_enq_bits_ftq_idx &&
+  soc1/frontend/fb/io_enq_bits_mask == soc2/frontend/fb/io_enq_bits_mask &&
+  soc1/frontend/fb/io_enq_bits_xcpt_pf_if == soc2/frontend/fb/io_enq_bits_xcpt_pf_if &&
+  soc1/frontend/fb/io_enq_bits_xcpt_ae_if == soc2/frontend/fb/io_enq_bits_xcpt_ae_if &&
+  soc1/frontend/fb/io_enq_bits_bp_debug_if_oh_0 == soc2/frontend/fb/io_enq_bits_bp_debug_if_oh_0 &&
+  soc1/frontend/fb/io_enq_bits_bp_debug_if_oh_1 == soc2/frontend/fb/io_enq_bits_bp_debug_if_oh_1 &&
+  soc1/frontend/fb/io_enq_bits_bp_debug_if_oh_2 == soc2/frontend/fb/io_enq_bits_bp_debug_if_oh_2 &&
+  soc1/frontend/fb/io_enq_bits_bp_debug_if_oh_3 == soc2/frontend/fb/io_enq_bits_bp_debug_if_oh_3 &&
+  soc1/frontend/fb/io_enq_bits_bp_xcpt_if_oh_0 == soc2/frontend/fb/io_enq_bits_bp_xcpt_if_oh_0 &&
+  soc1/frontend/fb/io_enq_bits_bp_xcpt_if_oh_1 == soc2/frontend/fb/io_enq_bits_bp_xcpt_if_oh_1 &&
+  soc1/frontend/fb/io_enq_bits_bp_xcpt_if_oh_2 == soc2/frontend/fb/io_enq_bits_bp_xcpt_if_oh_2 &&
+  soc1/frontend/fb/io_enq_bits_bp_xcpt_if_oh_3 == soc2/frontend/fb/io_enq_bits_bp_xcpt_if_oh_3 &&
+  soc1/frontend/fb/io_enq_bits_fsrc == soc2/frontend/fb/io_enq_bits_fsrc &&
+  soc1/frontend/fb/io_deq_ready == soc2/frontend/fb/io_deq_ready;
+end macro;
+
+
+macro boolean ftq_blackboxing :=
+  soc1/frontend/ftq/io_enq_ready == soc2/frontend/ftq/io_enq_ready &&
+  soc1/frontend/ftq/io_enq_idx == soc2/frontend/ftq/io_enq_idx &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_entry_cfi_idx_valid == soc2/frontend/ftq/io_get_ftq_pc_0_entry_cfi_idx_valid &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_entry_cfi_idx_bits == soc2/frontend/ftq/io_get_ftq_pc_0_entry_cfi_idx_bits &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_entry_ras_idx == soc2/frontend/ftq/io_get_ftq_pc_0_entry_ras_idx &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_entry_start_bank == soc2/frontend/ftq/io_get_ftq_pc_0_entry_start_bank &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_pc == soc2/frontend/ftq/io_get_ftq_pc_0_pc &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_com_pc == soc2/frontend/ftq/io_get_ftq_pc_0_com_pc &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_next_val == soc2/frontend/ftq/io_get_ftq_pc_0_next_val &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_next_pc == soc2/frontend/ftq/io_get_ftq_pc_0_next_pc &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_entry_cfi_idx_bits == soc2/frontend/ftq/io_get_ftq_pc_1_entry_cfi_idx_bits &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_entry_br_mask == soc2/frontend/ftq/io_get_ftq_pc_1_entry_br_mask &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_entry_cfi_is_call == soc2/frontend/ftq/io_get_ftq_pc_1_entry_cfi_is_call &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_entry_cfi_is_ret == soc2/frontend/ftq/io_get_ftq_pc_1_entry_cfi_is_ret &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_entry_start_bank == soc2/frontend/ftq/io_get_ftq_pc_1_entry_start_bank &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_ghist_old_history == soc2/frontend/ftq/io_get_ftq_pc_1_ghist_old_history &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_ghist_current_saw_branch_not_taken == soc2/frontend/ftq/io_get_ftq_pc_1_ghist_current_saw_branch_not_taken &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_ghist_new_saw_branch_not_taken == soc2/frontend/ftq/io_get_ftq_pc_1_ghist_new_saw_branch_not_taken &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_ghist_new_saw_branch_taken == soc2/frontend/ftq/io_get_ftq_pc_1_ghist_new_saw_branch_taken &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_ghist_ras_idx == soc2/frontend/ftq/io_get_ftq_pc_1_ghist_ras_idx &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_pc == soc2/frontend/ftq/io_get_ftq_pc_1_pc &&
+  soc1/frontend/ftq/io_bpdupdate_valid == soc2/frontend/ftq/io_bpdupdate_valid &&
+  soc1/frontend/ftq/io_bpdupdate_bits_is_mispredict_update == soc2/frontend/ftq/io_bpdupdate_bits_is_mispredict_update &&
+  soc1/frontend/ftq/io_bpdupdate_bits_is_repair_update == soc2/frontend/ftq/io_bpdupdate_bits_is_repair_update &&
+  soc1/frontend/ftq/io_bpdupdate_bits_pc == soc2/frontend/ftq/io_bpdupdate_bits_pc &&
+  soc1/frontend/ftq/io_bpdupdate_bits_br_mask == soc2/frontend/ftq/io_bpdupdate_bits_br_mask &&
+  soc1/frontend/ftq/io_bpdupdate_bits_cfi_idx_valid == soc2/frontend/ftq/io_bpdupdate_bits_cfi_idx_valid &&
+  soc1/frontend/ftq/io_bpdupdate_bits_cfi_idx_bits == soc2/frontend/ftq/io_bpdupdate_bits_cfi_idx_bits &&
+  soc1/frontend/ftq/io_bpdupdate_bits_cfi_taken == soc2/frontend/ftq/io_bpdupdate_bits_cfi_taken &&
+  soc1/frontend/ftq/io_bpdupdate_bits_cfi_mispredicted == soc2/frontend/ftq/io_bpdupdate_bits_cfi_mispredicted &&
+  soc1/frontend/ftq/io_bpdupdate_bits_cfi_is_br == soc2/frontend/ftq/io_bpdupdate_bits_cfi_is_br &&
+  soc1/frontend/ftq/io_bpdupdate_bits_cfi_is_jal == soc2/frontend/ftq/io_bpdupdate_bits_cfi_is_jal &&
+  soc1/frontend/ftq/io_bpdupdate_bits_ghist_old_history == soc2/frontend/ftq/io_bpdupdate_bits_ghist_old_history &&
+  soc1/frontend/ftq/io_bpdupdate_bits_target == soc2/frontend/ftq/io_bpdupdate_bits_target &&
+  soc1/frontend/ftq/io_bpdupdate_bits_meta_0 == soc2/frontend/ftq/io_bpdupdate_bits_meta_0 &&
+  soc1/frontend/ftq/io_ras_update == soc2/frontend/ftq/io_ras_update &&
+  soc1/frontend/ftq/io_ras_update_idx == soc2/frontend/ftq/io_ras_update_idx &&
+  soc1/frontend/ftq/io_ras_update_pc == soc2/frontend/ftq/io_ras_update_pc;
+end macro;
+
+
+macro boolean ftq_blackboxing_soundness :=
+  soc1/frontend/ftq/io_enq_valid == soc2/frontend/ftq/io_enq_valid &&
+  soc1/frontend/ftq/io_enq_bits_pc == soc2/frontend/ftq/io_enq_bits_pc &&
+  soc1/frontend/ftq/io_enq_bits_cfi_idx_valid == soc2/frontend/ftq/io_enq_bits_cfi_idx_valid &&
+  soc1/frontend/ftq/io_enq_bits_cfi_idx_bits == soc2/frontend/ftq/io_enq_bits_cfi_idx_bits &&
+  soc1/frontend/ftq/io_enq_bits_cfi_type == soc2/frontend/ftq/io_enq_bits_cfi_type &&
+  soc1/frontend/ftq/io_enq_bits_cfi_is_call == soc2/frontend/ftq/io_enq_bits_cfi_is_call &&
+  soc1/frontend/ftq/io_enq_bits_cfi_is_ret == soc2/frontend/ftq/io_enq_bits_cfi_is_ret &&
+  soc1/frontend/ftq/io_enq_bits_ras_top == soc2/frontend/ftq/io_enq_bits_ras_top &&
+  soc1/frontend/ftq/io_enq_bits_mask == soc2/frontend/ftq/io_enq_bits_mask &&
+  soc1/frontend/ftq/io_enq_bits_br_mask == soc2/frontend/ftq/io_enq_bits_br_mask &&
+  soc1/frontend/ftq/io_enq_bits_ghist_old_history == soc2/frontend/ftq/io_enq_bits_ghist_old_history &&
+  soc1/frontend/ftq/io_enq_bits_ghist_current_saw_branch_not_taken == soc2/frontend/ftq/io_enq_bits_ghist_current_saw_branch_not_taken &&
+  soc1/frontend/ftq/io_enq_bits_ghist_new_saw_branch_not_taken == soc2/frontend/ftq/io_enq_bits_ghist_new_saw_branch_not_taken &&
+  soc1/frontend/ftq/io_enq_bits_ghist_new_saw_branch_taken == soc2/frontend/ftq/io_enq_bits_ghist_new_saw_branch_taken &&
+  soc1/frontend/ftq/io_enq_bits_ghist_ras_idx == soc2/frontend/ftq/io_enq_bits_ghist_ras_idx &&
+  soc1/frontend/ftq/io_enq_bits_bpd_meta_0 == soc2/frontend/ftq/io_enq_bits_bpd_meta_0 &&
+  soc1/frontend/ftq/io_deq_valid == soc2/frontend/ftq/io_deq_valid &&
+  soc1/frontend/ftq/io_deq_bits == soc2/frontend/ftq/io_deq_bits &&
+  soc1/frontend/ftq/io_get_ftq_pc_0_ftq_idx == soc2/frontend/ftq/io_get_ftq_pc_0_ftq_idx &&
+  soc1/frontend/ftq/io_get_ftq_pc_1_ftq_idx == soc2/frontend/ftq/io_get_ftq_pc_1_ftq_idx &&
+  soc1/frontend/ftq/io_redirect_valid == soc2/frontend/ftq/io_redirect_valid &&
+  soc1/frontend/ftq/io_redirect_bits == soc2/frontend/ftq/io_redirect_bits &&
+  soc1/frontend/ftq/io_brupdate_b2_uop_ftq_idx == soc2/frontend/ftq/io_brupdate_b2_uop_ftq_idx &&
+  soc1/frontend/ftq/io_brupdate_b2_uop_pc_lob == soc2/frontend/ftq/io_brupdate_b2_uop_pc_lob &&
+  soc1/frontend/ftq/io_brupdate_b2_mispredict == soc2/frontend/ftq/io_brupdate_b2_mispredict;
+end macro;
+
+
+macro boolean tlb_blackboxing :=
+  soc1/frontend/tlb/io_req_ready == soc2/frontend/tlb/io_req_ready &&
+  soc1/frontend/tlb/io_resp_miss == soc2/frontend/tlb/io_resp_miss &&
+  soc1/frontend/tlb/io_resp_paddr == soc2/frontend/tlb/io_resp_paddr &&
+  soc1/frontend/tlb/io_resp_pf_inst == soc2/frontend/tlb/io_resp_pf_inst &&
+  soc1/frontend/tlb/io_resp_ae_inst == soc2/frontend/tlb/io_resp_ae_inst &&
+  soc1/frontend/tlb/io_ptw_req_valid == soc2/frontend/tlb/io_ptw_req_valid &&
+  soc1/frontend/tlb/io_ptw_req_bits_bits_addr == soc2/frontend/tlb/io_ptw_req_bits_bits_addr;
+end macro;
+
+
+macro boolean tlb_blackboxing_soundness :=
+  soc1/frontend/tlb/io_req_valid == soc2/frontend/tlb/io_req_valid &&
+  soc1/frontend/tlb/io_req_bits_vaddr == soc2/frontend/tlb/io_req_bits_vaddr &&
+  soc1/frontend/tlb/io_sfence_valid == soc2/frontend/tlb/io_sfence_valid &&
+  soc1/frontend/tlb/io_sfence_bits_rs1 == soc2/frontend/tlb/io_sfence_bits_rs1 &&
+  soc1/frontend/tlb/io_sfence_bits_rs2 == soc2/frontend/tlb/io_sfence_bits_rs2 &&
+  soc1/frontend/tlb/io_sfence_bits_addr == soc2/frontend/tlb/io_sfence_bits_addr &&
+  soc1/frontend/tlb/io_ptw_req_ready == soc2/frontend/tlb/io_ptw_req_ready &&
+  soc1/frontend/tlb/io_ptw_resp_valid == soc2/frontend/tlb/io_ptw_resp_valid &&
+  soc1/frontend/tlb/io_ptw_resp_bits_ae == soc2/frontend/tlb/io_ptw_resp_bits_ae &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_ppn == soc2/frontend/tlb/io_ptw_resp_bits_pte_ppn &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_d == soc2/frontend/tlb/io_ptw_resp_bits_pte_d &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_a == soc2/frontend/tlb/io_ptw_resp_bits_pte_a &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_g == soc2/frontend/tlb/io_ptw_resp_bits_pte_g &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_u == soc2/frontend/tlb/io_ptw_resp_bits_pte_u &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_x == soc2/frontend/tlb/io_ptw_resp_bits_pte_x &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_w == soc2/frontend/tlb/io_ptw_resp_bits_pte_w &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_r == soc2/frontend/tlb/io_ptw_resp_bits_pte_r &&
+  soc1/frontend/tlb/io_ptw_resp_bits_pte_v == soc2/frontend/tlb/io_ptw_resp_bits_pte_v &&
+  soc1/frontend/tlb/io_ptw_resp_bits_level == soc2/frontend/tlb/io_ptw_resp_bits_level &&
+  soc1/frontend/tlb/io_ptw_resp_bits_homogeneous == soc2/frontend/tlb/io_ptw_resp_bits_homogeneous &&
+  soc1/frontend/tlb/io_ptw_ptbr_mode == soc2/frontend/tlb/io_ptw_ptbr_mode &&
+  soc1/frontend/tlb/io_ptw_status_debug == soc2/frontend/tlb/io_ptw_status_debug &&
+  soc1/frontend/tlb/io_ptw_status_prv == soc2/frontend/tlb/io_ptw_status_prv &&
+  soc1/frontend/tlb/io_ptw_pmp_0_cfg_l == soc2/frontend/tlb/io_ptw_pmp_0_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_0_cfg_a == soc2/frontend/tlb/io_ptw_pmp_0_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_0_cfg_x == soc2/frontend/tlb/io_ptw_pmp_0_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_0_cfg_w == soc2/frontend/tlb/io_ptw_pmp_0_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_0_cfg_r == soc2/frontend/tlb/io_ptw_pmp_0_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_0_addr == soc2/frontend/tlb/io_ptw_pmp_0_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_0_mask == soc2/frontend/tlb/io_ptw_pmp_0_mask &&
+  soc1/frontend/tlb/io_ptw_pmp_1_cfg_l == soc2/frontend/tlb/io_ptw_pmp_1_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_1_cfg_a == soc2/frontend/tlb/io_ptw_pmp_1_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_1_cfg_x == soc2/frontend/tlb/io_ptw_pmp_1_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_1_cfg_w == soc2/frontend/tlb/io_ptw_pmp_1_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_1_cfg_r == soc2/frontend/tlb/io_ptw_pmp_1_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_1_addr == soc2/frontend/tlb/io_ptw_pmp_1_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_1_mask == soc2/frontend/tlb/io_ptw_pmp_1_mask &&
+  soc1/frontend/tlb/io_ptw_pmp_2_cfg_l == soc2/frontend/tlb/io_ptw_pmp_2_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_2_cfg_a == soc2/frontend/tlb/io_ptw_pmp_2_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_2_cfg_x == soc2/frontend/tlb/io_ptw_pmp_2_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_2_cfg_w == soc2/frontend/tlb/io_ptw_pmp_2_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_2_cfg_r == soc2/frontend/tlb/io_ptw_pmp_2_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_2_addr == soc2/frontend/tlb/io_ptw_pmp_2_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_2_mask == soc2/frontend/tlb/io_ptw_pmp_2_mask &&
+  soc1/frontend/tlb/io_ptw_pmp_3_cfg_l == soc2/frontend/tlb/io_ptw_pmp_3_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_3_cfg_a == soc2/frontend/tlb/io_ptw_pmp_3_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_3_cfg_x == soc2/frontend/tlb/io_ptw_pmp_3_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_3_cfg_w == soc2/frontend/tlb/io_ptw_pmp_3_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_3_cfg_r == soc2/frontend/tlb/io_ptw_pmp_3_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_3_addr == soc2/frontend/tlb/io_ptw_pmp_3_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_3_mask == soc2/frontend/tlb/io_ptw_pmp_3_mask &&
+  soc1/frontend/tlb/io_ptw_pmp_4_cfg_l == soc2/frontend/tlb/io_ptw_pmp_4_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_4_cfg_a == soc2/frontend/tlb/io_ptw_pmp_4_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_4_cfg_x == soc2/frontend/tlb/io_ptw_pmp_4_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_4_cfg_w == soc2/frontend/tlb/io_ptw_pmp_4_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_4_cfg_r == soc2/frontend/tlb/io_ptw_pmp_4_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_4_addr == soc2/frontend/tlb/io_ptw_pmp_4_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_4_mask == soc2/frontend/tlb/io_ptw_pmp_4_mask &&
+  soc1/frontend/tlb/io_ptw_pmp_5_cfg_l == soc2/frontend/tlb/io_ptw_pmp_5_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_5_cfg_a == soc2/frontend/tlb/io_ptw_pmp_5_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_5_cfg_x == soc2/frontend/tlb/io_ptw_pmp_5_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_5_cfg_w == soc2/frontend/tlb/io_ptw_pmp_5_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_5_cfg_r == soc2/frontend/tlb/io_ptw_pmp_5_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_5_addr == soc2/frontend/tlb/io_ptw_pmp_5_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_5_mask == soc2/frontend/tlb/io_ptw_pmp_5_mask &&
+  soc1/frontend/tlb/io_ptw_pmp_6_cfg_l == soc2/frontend/tlb/io_ptw_pmp_6_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_6_cfg_a == soc2/frontend/tlb/io_ptw_pmp_6_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_6_cfg_x == soc2/frontend/tlb/io_ptw_pmp_6_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_6_cfg_w == soc2/frontend/tlb/io_ptw_pmp_6_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_6_cfg_r == soc2/frontend/tlb/io_ptw_pmp_6_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_6_addr == soc2/frontend/tlb/io_ptw_pmp_6_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_6_mask == soc2/frontend/tlb/io_ptw_pmp_6_mask &&
+  soc1/frontend/tlb/io_ptw_pmp_7_cfg_l == soc2/frontend/tlb/io_ptw_pmp_7_cfg_l &&
+  soc1/frontend/tlb/io_ptw_pmp_7_cfg_a == soc2/frontend/tlb/io_ptw_pmp_7_cfg_a &&
+  soc1/frontend/tlb/io_ptw_pmp_7_cfg_x == soc2/frontend/tlb/io_ptw_pmp_7_cfg_x &&
+  soc1/frontend/tlb/io_ptw_pmp_7_cfg_w == soc2/frontend/tlb/io_ptw_pmp_7_cfg_w &&
+  soc1/frontend/tlb/io_ptw_pmp_7_cfg_r == soc2/frontend/tlb/io_ptw_pmp_7_cfg_r &&
+  soc1/frontend/tlb/io_ptw_pmp_7_addr == soc2/frontend/tlb/io_ptw_pmp_7_addr &&
+  soc1/frontend/tlb/io_ptw_pmp_7_mask == soc2/frontend/tlb/io_ptw_pmp_7_mask;
+end macro;
+
+
+macro boolean dtlb_blackboxing :=
+  soc1/lsu/dtlb/io_req_0_ready == soc2/lsu/dtlb/io_req_0_ready &&
+  soc1/lsu/dtlb/io_miss_rdy == soc2/lsu/dtlb/io_miss_rdy &&
+  soc1/lsu/dtlb/io_resp_0_miss == soc2/lsu/dtlb/io_resp_0_miss &&
+  soc1/lsu/dtlb/io_resp_0_paddr == soc2/lsu/dtlb/io_resp_0_paddr &&
+  soc1/lsu/dtlb/io_resp_0_pf_ld == soc2/lsu/dtlb/io_resp_0_pf_ld &&
+  soc1/lsu/dtlb/io_resp_0_pf_st == soc2/lsu/dtlb/io_resp_0_pf_st &&
+  soc1/lsu/dtlb/io_resp_0_ae_ld == soc2/lsu/dtlb/io_resp_0_ae_ld &&
+  soc1/lsu/dtlb/io_resp_0_ae_st == soc2/lsu/dtlb/io_resp_0_ae_st &&
+  soc1/lsu/dtlb/io_resp_0_ma_ld == soc2/lsu/dtlb/io_resp_0_ma_ld &&
+  soc1/lsu/dtlb/io_resp_0_ma_st == soc2/lsu/dtlb/io_resp_0_ma_st &&
+  soc1/lsu/dtlb/io_resp_0_cacheable == soc2/lsu/dtlb/io_resp_0_cacheable &&
+  soc1/lsu/dtlb/io_ptw_req_valid == soc2/lsu/dtlb/io_ptw_req_valid &&
+  soc1/lsu/dtlb/io_ptw_req_bits_valid == soc2/lsu/dtlb/io_ptw_req_bits_valid &&
+  soc1/lsu/dtlb/io_ptw_req_bits_bits_addr == soc2/lsu/dtlb/io_ptw_req_bits_bits_addr;
+end macro;
+
+
+macro boolean dtlb_blackboxing_soundness :=
+  soc1/lsu/dtlb/io_req_0_valid == soc2/lsu/dtlb/io_req_0_valid &&
+  soc1/lsu/dtlb/io_req_0_bits_vaddr == soc2/lsu/dtlb/io_req_0_bits_vaddr &&
+  soc1/lsu/dtlb/io_req_0_bits_passthrough == soc2/lsu/dtlb/io_req_0_bits_passthrough &&
+  soc1/lsu/dtlb/io_req_0_bits_size == soc2/lsu/dtlb/io_req_0_bits_size &&
+  soc1/lsu/dtlb/io_req_0_bits_cmd == soc2/lsu/dtlb/io_req_0_bits_cmd &&
+  soc1/lsu/dtlb/io_sfence_valid == soc2/lsu/dtlb/io_sfence_valid &&
+  soc1/lsu/dtlb/io_sfence_bits_rs1 == soc2/lsu/dtlb/io_sfence_bits_rs1 &&
+  soc1/lsu/dtlb/io_sfence_bits_rs2 == soc2/lsu/dtlb/io_sfence_bits_rs2 &&
+  soc1/lsu/dtlb/io_sfence_bits_addr == soc2/lsu/dtlb/io_sfence_bits_addr &&
+  soc1/lsu/dtlb/io_ptw_req_ready == soc2/lsu/dtlb/io_ptw_req_ready &&
+  soc1/lsu/dtlb/io_ptw_resp_valid == soc2/lsu/dtlb/io_ptw_resp_valid &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_ae == soc2/lsu/dtlb/io_ptw_resp_bits_ae &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_ppn == soc2/lsu/dtlb/io_ptw_resp_bits_pte_ppn &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_d == soc2/lsu/dtlb/io_ptw_resp_bits_pte_d &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_a == soc2/lsu/dtlb/io_ptw_resp_bits_pte_a &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_g == soc2/lsu/dtlb/io_ptw_resp_bits_pte_g &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_u == soc2/lsu/dtlb/io_ptw_resp_bits_pte_u &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_x == soc2/lsu/dtlb/io_ptw_resp_bits_pte_x &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_w == soc2/lsu/dtlb/io_ptw_resp_bits_pte_w &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_r == soc2/lsu/dtlb/io_ptw_resp_bits_pte_r &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_pte_v == soc2/lsu/dtlb/io_ptw_resp_bits_pte_v &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_level == soc2/lsu/dtlb/io_ptw_resp_bits_level &&
+  soc1/lsu/dtlb/io_ptw_resp_bits_homogeneous == soc2/lsu/dtlb/io_ptw_resp_bits_homogeneous &&
+  soc1/lsu/dtlb/io_ptw_ptbr_mode == soc2/lsu/dtlb/io_ptw_ptbr_mode &&
+  soc1/lsu/dtlb/io_ptw_status_dprv == soc2/lsu/dtlb/io_ptw_status_dprv &&
+  soc1/lsu/dtlb/io_ptw_status_mxr == soc2/lsu/dtlb/io_ptw_status_mxr &&
+  soc1/lsu/dtlb/io_ptw_status_sum == soc2/lsu/dtlb/io_ptw_status_sum &&
+  soc1/lsu/dtlb/io_ptw_pmp_0_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_0_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_0_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_0_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_0_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_0_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_0_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_0_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_0_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_0_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_0_addr == soc2/lsu/dtlb/io_ptw_pmp_0_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_0_mask == soc2/lsu/dtlb/io_ptw_pmp_0_mask &&
+  soc1/lsu/dtlb/io_ptw_pmp_1_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_1_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_1_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_1_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_1_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_1_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_1_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_1_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_1_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_1_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_1_addr == soc2/lsu/dtlb/io_ptw_pmp_1_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_1_mask == soc2/lsu/dtlb/io_ptw_pmp_1_mask &&
+  soc1/lsu/dtlb/io_ptw_pmp_2_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_2_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_2_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_2_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_2_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_2_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_2_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_2_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_2_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_2_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_2_addr == soc2/lsu/dtlb/io_ptw_pmp_2_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_2_mask == soc2/lsu/dtlb/io_ptw_pmp_2_mask &&
+  soc1/lsu/dtlb/io_ptw_pmp_3_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_3_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_3_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_3_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_3_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_3_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_3_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_3_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_3_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_3_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_3_addr == soc2/lsu/dtlb/io_ptw_pmp_3_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_3_mask == soc2/lsu/dtlb/io_ptw_pmp_3_mask &&
+  soc1/lsu/dtlb/io_ptw_pmp_4_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_4_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_4_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_4_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_4_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_4_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_4_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_4_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_4_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_4_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_4_addr == soc2/lsu/dtlb/io_ptw_pmp_4_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_4_mask == soc2/lsu/dtlb/io_ptw_pmp_4_mask &&
+  soc1/lsu/dtlb/io_ptw_pmp_5_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_5_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_5_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_5_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_5_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_5_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_5_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_5_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_5_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_5_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_5_addr == soc2/lsu/dtlb/io_ptw_pmp_5_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_5_mask == soc2/lsu/dtlb/io_ptw_pmp_5_mask &&
+  soc1/lsu/dtlb/io_ptw_pmp_6_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_6_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_6_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_6_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_6_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_6_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_6_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_6_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_6_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_6_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_6_addr == soc2/lsu/dtlb/io_ptw_pmp_6_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_6_mask == soc2/lsu/dtlb/io_ptw_pmp_6_mask &&
+  soc1/lsu/dtlb/io_ptw_pmp_7_cfg_l == soc2/lsu/dtlb/io_ptw_pmp_7_cfg_l &&
+  soc1/lsu/dtlb/io_ptw_pmp_7_cfg_a == soc2/lsu/dtlb/io_ptw_pmp_7_cfg_a &&
+  soc1/lsu/dtlb/io_ptw_pmp_7_cfg_x == soc2/lsu/dtlb/io_ptw_pmp_7_cfg_x &&
+  soc1/lsu/dtlb/io_ptw_pmp_7_cfg_w == soc2/lsu/dtlb/io_ptw_pmp_7_cfg_w &&
+  soc1/lsu/dtlb/io_ptw_pmp_7_cfg_r == soc2/lsu/dtlb/io_ptw_pmp_7_cfg_r &&
+  soc1/lsu/dtlb/io_ptw_pmp_7_addr == soc2/lsu/dtlb/io_ptw_pmp_7_addr &&
+  soc1/lsu/dtlb/io_ptw_pmp_7_mask == soc2/lsu/dtlb/io_ptw_pmp_7_mask;
+end macro;
+
+
+macro boolean l2_tlb_ram_blackboxing :=
+  soc1/ptw/l2_tlb_ram/RW0_rdata == soc2/ptw/l2_tlb_ram/RW0_rdata;
+end macro;
+
+
+macro boolean l2_tlb_ram_blackboxing_soundness :=
+  soc1/ptw/l2_tlb_ram/RW0_addr == soc2/ptw/l2_tlb_ram/RW0_addr &&
+  soc1/ptw/l2_tlb_ram/RW0_en == soc2/ptw/l2_tlb_ram/RW0_en &&
+  soc1/ptw/l2_tlb_ram/RW0_clk == soc2/ptw/l2_tlb_ram/RW0_clk &&
+  soc1/ptw/l2_tlb_ram/RW0_wmode == soc2/ptw/l2_tlb_ram/RW0_wmode &&
+  soc1/ptw/l2_tlb_ram/RW0_wdata == soc2/ptw/l2_tlb_ram/RW0_wdata;
+end macro;
+
+
+macro boolean tag_array_blackboxing :=
+  soc1/frontend/icache/tag_array/RW0_rdata_0 == soc2/frontend/icache/tag_array/RW0_rdata_0 &&
+  soc1/frontend/icache/tag_array/RW0_rdata_1 == soc2/frontend/icache/tag_array/RW0_rdata_1 &&
+  soc1/frontend/icache/tag_array/RW0_rdata_2 == soc2/frontend/icache/tag_array/RW0_rdata_2 &&
+  soc1/frontend/icache/tag_array/RW0_rdata_3 == soc2/frontend/icache/tag_array/RW0_rdata_3;
+end macro;
+
+
+macro boolean tag_array_blackboxing_soundness :=
+  soc1/frontend/icache/tag_array/RW0_addr == soc2/frontend/icache/tag_array/RW0_addr &&
+  soc1/frontend/icache/tag_array/RW0_en == soc2/frontend/icache/tag_array/RW0_en &&
+  soc1/frontend/icache/tag_array/RW0_clk == soc2/frontend/icache/tag_array/RW0_clk &&
+  soc1/frontend/icache/tag_array/RW0_wmode == soc2/frontend/icache/tag_array/RW0_wmode &&
+  soc1/frontend/icache/tag_array/RW0_wdata_0 == soc2/frontend/icache/tag_array/RW0_wdata_0 &&
+  soc1/frontend/icache/tag_array/RW0_wdata_1 == soc2/frontend/icache/tag_array/RW0_wdata_1 &&
+  soc1/frontend/icache/tag_array/RW0_wdata_2 == soc2/frontend/icache/tag_array/RW0_wdata_2 &&
+  soc1/frontend/icache/tag_array/RW0_wdata_3 == soc2/frontend/icache/tag_array/RW0_wdata_3 &&
+  soc1/frontend/icache/tag_array/RW0_wmask_0 == soc2/frontend/icache/tag_array/RW0_wmask_0 &&
+  soc1/frontend/icache/tag_array/RW0_wmask_1 == soc2/frontend/icache/tag_array/RW0_wmask_1 &&
+  soc1/frontend/icache/tag_array/RW0_wmask_2 == soc2/frontend/icache/tag_array/RW0_wmask_2;
+end macro;
+
+
+macro boolean dataArrayWay_0_blackboxing :=
+  soc1/frontend/icache/dataArrayWay_0/RW0_rdata == soc2/frontend/icache/dataArrayWay_0/RW0_rdata;
+end macro;
+
+
+macro boolean dataArrayWay_0_blackboxing_soundness :=
+  soc1/frontend/icache/dataArrayWay_0/RW0_addr == soc2/frontend/icache/dataArrayWay_0/RW0_addr &&
+  soc1/frontend/icache/dataArrayWay_0/RW0_en == soc2/frontend/icache/dataArrayWay_0/RW0_en &&
+  soc1/frontend/icache/dataArrayWay_0/RW0_clk == soc2/frontend/icache/dataArrayWay_0/RW0_clk &&
+  soc1/frontend/icache/dataArrayWay_0/RW0_wmode == soc2/frontend/icache/dataArrayWay_0/RW0_wmode &&
+  soc1/frontend/icache/dataArrayWay_0/RW0_wdata == soc2/frontend/icache/dataArrayWay_0/RW0_wdata;
+end macro;
+
+
+macro boolean dataArrayWay_1_blackboxing :=
+  soc1/frontend/icache/dataArrayWay_1/RW0_rdata == soc2/frontend/icache/dataArrayWay_1/RW0_rdata;
+end macro;
+
+
+macro boolean dataArrayWay_1_blackboxing_soundness :=
+  soc1/frontend/icache/dataArrayWay_1/RW0_addr == soc2/frontend/icache/dataArrayWay_1/RW0_addr &&
+  soc1/frontend/icache/dataArrayWay_1/RW0_en == soc2/frontend/icache/dataArrayWay_1/RW0_en &&
+  soc1/frontend/icache/dataArrayWay_1/RW0_clk == soc2/frontend/icache/dataArrayWay_1/RW0_clk &&
+  soc1/frontend/icache/dataArrayWay_1/RW0_wmode == soc2/frontend/icache/dataArrayWay_1/RW0_wmode &&
+  soc1/frontend/icache/dataArrayWay_1/RW0_wdata == soc2/frontend/icache/dataArrayWay_1/RW0_wdata;
+end macro;
+
+
+macro boolean dataArrayWay_2_blackboxing :=
+  soc1/frontend/icache/dataArrayWay_2/RW0_rdata == soc2/frontend/icache/dataArrayWay_2/RW0_rdata;
+end macro;
+
+
+macro boolean dataArrayWay_2_blackboxing_soundness :=
+  soc1/frontend/icache/dataArrayWay_2/RW0_addr == soc2/frontend/icache/dataArrayWay_2/RW0_addr &&
+  soc1/frontend/icache/dataArrayWay_2/RW0_en == soc2/frontend/icache/dataArrayWay_2/RW0_en &&
+  soc1/frontend/icache/dataArrayWay_2/RW0_clk == soc2/frontend/icache/dataArrayWay_2/RW0_clk &&
+  soc1/frontend/icache/dataArrayWay_2/RW0_wmode == soc2/frontend/icache/dataArrayWay_2/RW0_wmode &&
+  soc1/frontend/icache/dataArrayWay_2/RW0_wdata == soc2/frontend/icache/dataArrayWay_2/RW0_wdata;
+end macro;
+
+
+macro boolean dataArrayWay_3_blackboxing :=
+  soc1/frontend/icache/dataArrayWay_3/RW0_rdata == soc2/frontend/icache/dataArrayWay_3/RW0_rdata;
+end macro;
+
+
+macro boolean dataArrayWay_3_blackboxing_soundness :=
+  soc1/frontend/icache/dataArrayWay_3/RW0_addr == soc2/frontend/icache/dataArrayWay_3/RW0_addr &&
+  soc1/frontend/icache/dataArrayWay_3/RW0_en == soc2/frontend/icache/dataArrayWay_3/RW0_en &&
+  soc1/frontend/icache/dataArrayWay_3/RW0_clk == soc2/frontend/icache/dataArrayWay_3/RW0_clk &&
+  soc1/frontend/icache/dataArrayWay_3/RW0_wmode == soc2/frontend/icache/dataArrayWay_3/RW0_wmode &&
+  soc1/frontend/icache/dataArrayWay_3/RW0_wdata == soc2/frontend/icache/dataArrayWay_3/RW0_wdata;
+end macro;
+
+macro boolean blackboxing :=
+ /*fregfile_blackboxing && iregfile_blackboxing &&*/ data_blackboxing && meta_0_blackboxing 
+&& banked_predictors_0_blackboxing && fb_blackboxing && ftq_blackboxing && tlb_blackboxing && dtlb_blackboxing && l2_tlb_ram_blackboxing && 
+tag_array_blackboxing && dataArrayWay_0_blackboxing && dataArrayWay_1_blackboxing && dataArrayWay_2_blackboxing && dataArrayWay_3_blackboxing;
+
+end macro;

@@ -1,0 +1,68 @@
+include "micro_soc_macro.vli";
+include "blackboxing.vli";
+
+macro integer K := 4; end macro;
+
+macro integer USER_MODE := 0; end macro;
+
+macro unsigned secret_cache_tag := 20'h8abcd; end macro;
+
+constraint no_reset :=
+  !reset;
+end constraint;
+
+macro boolean page_table_protection :=
+  ( ( ( soc1/lsu/will_fire_hella_incoming_0 || soc1/lsu/will_fire_load_retry_0 )  &&
+	  soc1/lsu/dtlb/io_resp_0_paddr[31:12] == secret_cache_tag && !soc1/lsu/dtlb/io_resp_0_miss)
+    ? ( soc1/lsu/dtlb/io_resp_0_pf_ld ) : true ) &&
+
+  ( ( ( soc2/lsu/will_fire_hella_incoming_0 || soc2/lsu/will_fire_load_retry_0 )  &&
+	  soc2/lsu/dtlb/io_resp_0_paddr[31:12] == secret_cache_tag && !soc2/lsu/dtlb/io_resp_0_miss)
+    ? ( soc2/lsu/dtlb/io_resp_0_pf_ld ) : true ) ;
+end macro;
+
+
+macro boolean secret_load_speculative :=
+  ( soc1/dcache/io_lsu_resp_0_valid && soc2/dcache/io_lsu_resp_0_valid &&
+      soc1/dcache/io_lsu_resp_0_bits_data != soc2/dcache/io_lsu_resp_0_bits_data ) ?
+	soc1/dcache/s2_req_0_uop_br_mask != 12'h0 && soc2/dcache/s2_req_0_uop_br_mask != 12'h0 : true;
+end macro;
+
+
+macro boolean secret_data_protected :=
+  ( soc1/core/csr/io_status_dprv == USER_MODE ) ?
+	page_table_protection : secret_load_speculative ;
+end macro;
+
+macro boolean init_mispred_signals :=
+  ((mispred_flag_1 == 1'b0) && (mispred_flag_2 == 1'b0) && (mispred_happened_1 == 1'b0) && (mispred_happened_2 == 1'b0));
+end macro;
+
+macro boolean fp_pipeline_disabled :=
+  (soc1/core/fp_pipeline/io_to_int_valid | soc1/core/fp_pipeline/io_to_sdq_valid | soc1/core/fp_pipeline/io_wakeups_0_valid |
+  soc1/core/fp_pipeline/io_wakeups_1_valid |
+  soc2/core/fp_pipeline/io_to_int_valid | soc2/core/fp_pipeline/io_to_sdq_valid | soc2/core/fp_pipeline/io_wakeups_0_valid |
+  soc2/core/fp_pipeline/io_wakeups_1_valid
+  ) == 1'b0;
+end macro;
+
+property UPEC_boom;
+	dependencies: no_reset;
+
+	assume:
+		during[t, t+K]: blackboxing;
+
+		during[t, t+K]: secret_data_protected;
+
+		at t: state_equivalence;
+
+		at t: init_mispred_signals;
+
+    during[t, t+K]: fp_pipeline_disabled;
+
+		during[t, t+K]: microequivalence == 1'b1;
+
+	prove:
+		at t+K: lAlert == 1'b0 && lAlert_earlyAlarm == 1'b0;
+
+end property;
