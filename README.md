@@ -21,7 +21,11 @@ The basic idea of UPEC is to check if a set of confidential information, in shor
 
 UPEC verifies this requirement by checking a 2-safety property (= a property that relates to 2 execution traces rather than one) on a tailor-made miter model (Fig. 1). In this model, the two CPU instances execute the same program, since the two memories must have the same content. This content is not specified so that the CPUs can execute any program. The only difference between the two instances can be in the protected memory location hosting the secret. Based on this model, assuming both CPUs start from the same initial state, we check if the secret data lead to different executions in the two instances for any program.
 
-![Figure 1: UPEC Miter](Documentation/figures/computational-model-v03.jpg)
+
+| ![fig-1.jpg](https://raw.githubusercontent.com/mofadiheh/upec-boom-verification-suite/main/Documentation/figures/computational-model-v03.jpg) | 
+|:--:| 
+| *Figure 1: UPEC Miter* | 
+
 
 ## General OOO Processor Model 
 
@@ -44,7 +48,10 @@ To address this issue, instead of engaging in a tedious process of modeling all 
 
 Fig. 2 shows a general model of how instructions execute in a transient execution attack. The program does not depend on the secret from the ISA level point of view, thus there must be no instruction in the main sequence that depends on the secret. However, instructions in the transient sequence (in a Spectre-style attack these typically belong to a privileged process called by the attacker) can access the secret but cannot commit. In the following, we assume that the transient instructions are discarded due to a misprediction event. For the case that an exception discards the transient instructions the approach is analogous.
 
-![Figure 2: General model for transient execution attack: microarchitectural flow](Documentation/figures/transient-inst-seq-v03.jpg)
+
+| ![fig-2.jpg](https://raw.githubusercontent.com/mofadiheh/upec-boom-verification-suite/main/Documentation/figures/transient-inst-seq-v03.jpg) | 
+|:--:| 
+| *Figure 2: General model for transient execution attack: microarchitectural flow* | 
 
 
 For information leakage to happen, the transient sequence must affect the behavior of the main sequence. Consequently, a spurious behavior (due to invalid execution order) can only lead to a false counterexample to the UPEC proof if it creates a false interrelation between the transient and the main sequence (e.g., the secret value being forwarded from the transient sequence to the main sequence). Due to the UPEC miter structure, any spurious behavior within each block is irrelevant for the proof. This means that the bookkeeping mechanisms must be constrained to ensure the program order only between the three code blocks in Fig. 2, but not necessarily within each block. This observation is key and allows us to approximate microequivalence effectively in terms of tag and ID consistency, and by a partitioning of the ROB into a committable and uncommittable part, as will be elaborated in the following.
@@ -55,7 +62,11 @@ In the following, the ROB ID of the last instruction in the main sequence is den
 
 **Uncommittable set:** ROB slots with an ID that is after the root\_ID, i.e., ROB IDs which are not between ROB head and root\_ID. Instructions in these slots cannot commit their results. They are invalidated when the misprediction signal is asserted.
 
-![Figure 3: Partitioning the ROB](Documentation/figures/fig_rob_partitioning.png)
+
+| ![fig-3.png](https://raw.githubusercontent.com/mofadiheh/upec-boom-verification-suite/main/Documentation/figures/fig_rob_partitioning.png) | 
+|:--:| 
+| *Figure 3: Partitioning the ROB* | 
+
 
 Based on the partitioning of the ROB, we describe three sets of assumptions that together create an over-approximation of the microequivalence requirement which does not restrict the generality of the proof. They are denoted in the following by ME-1, ME-2,. . . , ME-6. A template for these assumptions is provided [here](https://github.com/mofadiheh/upec-boom-verification-suite/blob/main/Documentation/UPEC_OOO_Template.v), which can be used to develop the UPEC property for any OOO processor. 
 
