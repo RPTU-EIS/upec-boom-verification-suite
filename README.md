@@ -68,7 +68,7 @@ In the following, the ROB ID of the last instruction in the main sequence is den
 | *Figure 3: Partitioning the ROB* | 
 
 
-Based on the partitioning of the ROB, we describe three sets of assumptions that together create an over-approximation of the microequivalence requirement which does not restrict the generality of the proof. They are denoted in the following by ME-1, ME-2,. . . , ME-6. A template for these assumptions is provided [here](https://github.com/mofadiheh/upec-boom-verification-suite/blob/main/Documentation/UPEC_OOO_Template.v), which can be used to develop the UPEC property for any OOO processor. 
+Based on the partitioning of the ROB, we describe three sets of assumptions that together create an over-approximation of the microequivalence requirement which does not restrict the generality of the proof. They are denoted in the following by ME-1, ME-2,. . . , ME-6. A template for these assumptions is provided in  [Documentation/UPEC_OOO_Template.v](https://github.com/mofadiheh/upec-boom-verification-suite/blob/main/Documentation/UPEC_OOO_Template.v), which can be used to develop the UPEC property for any OOO processor. 
 
 ### ROB Consistency:
 The bookkeeping mechanism must be constrained to prevent spurious behaviors in speculative execution scenarios, in which instructions commit before speculation resolution. The following set of assumptions prevents the occurrence of spurious counterexamples in which instructions in the uncommittable ROB slots commit their results.
@@ -119,7 +119,7 @@ Based on this partitioning we make sure that the uncommittable SPI instructions 
 *The spawn tag of every in-flight SPI instruction with ROB ID in the uncommittable set must not be equal to or above (according to program order) any of the tags in the committable tags set.*
 
 
-Implementing these conditions in a property language is straight-forward and only involves identifying the buffers containing tags and IDs of in-flight instructions. A template for applying UPEC to out-of-order processors using microequivalence is available [here](https://github.com/mofadiheh/upec-boom-verification-suite/blob/main/Documentation/UPEC_OOO_Template.v). It is used as a basis for developing the BOOM Verification suite. 
+Implementing these conditions in a property language is straight-forward and only involves identifying the buffers containing tags and IDs of in-flight instructions. A template for applying UPEC to out-of-order processors using microequivalence is available in [Documentation/UPEC_OOO_Template.v](https://github.com/mofadiheh/upec-boom-verification-suite/blob/main/Documentation/UPEC_OOO_Template.v). It is used as a basis for developing the BOOM Verification suite. 
 
 ## BOOM
 The Berkeley Out-of-Order Machine (BOOM) is a synthesizable and parameterizable open-source RISC-V out-of-order core written in the Chisel hardware construction language and is developed by the UC Berkeley Architecture Research group.  
