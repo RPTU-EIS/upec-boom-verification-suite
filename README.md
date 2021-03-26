@@ -13,7 +13,11 @@ The basic idea of UPEC is to check if a set of confidential information, in shor
 
 UPEC verifies this requirement by checking a 2-safety property (= a property that relates to 2 execution traces rather than one) on a tailor-made miter model (Fig. 1). In this model, the two CPUs execute the exact same program, since the two memories must have the same content. This content is not specified so that the CPUs can execute any program. The only difference between the two instances can be in the protected memory location hosting the secret. Based on this model we check, assuming both CPUs start from the same initial state, if the secret data lead to different executions in the two instances for any program.
 
-![](Documentation/figures/computational-model-v03.jpg)
+
+| ![fig-1.jpg](https://raw.githubusercontent.com/mofadiheh/upec-boom-verification-suite/main/Documentation/figures/computational-model-v03.jpg) | 
+|:--:| 
+| *Figure 1: UPEC Miter* | 
+
 
 ## Microequivalence
 The UPEC proof is an unbounded proof based on an unrolled circuit model with symbolic initial state. The symbolic initial state enables the solver to explore all possible program contexts implicitly, and it is the contributing factor to achieve a conclusive proof result at the end. However, this symbolic intial state overapproximates the reachable state set of the system and leads to spurious counterexamples, which are violating the program order. 
@@ -22,7 +26,10 @@ To address this issue, the proof is constrained by a new invariant, which we cal
 
 Instead of engaging into a tedious process of modeling all relevant functional behaviors by assertions (invariants), we (conservatively) over-approximate microequivalence in terms of certain data structures used in the bookkeeping mechanisms of OOO-execution, as introduced by the processor model of the previous section. Fig. 2 shows a general model of how instructions execute in a transient execution attack. Since the program must have a secret-independent architectural observation, there must be no instruction in the main sequence that depends on the secret. However, instructions in the transient sequence (in a Spectre-style attack these typically belong to a privileged process called by the attacker) can access the secret but cannot commit. In the following, we assume that the transient instructions are discarded due to a misprediction event. For the case that an exception discards the transient instructions the approach is analogous.
 
-![](Documentation/figures/transient-inst-seq-v03.jpg)
+
+| ![fig-2.jpg](https://raw.githubusercontent.com/mofadiheh/upec-boom-verification-suite/main/Documentation/figures/transient-inst-seq-v03.jpg) | 
+|:--:| 
+| *Figure 2: General model for transient execution attack: microarchitectural flow* | 
 
 
 For information leakage to happen, the transient sequence must affect the behavior of the main sequence. Consequently, a spurious behavior (due to invalid execution order) can only lead to a false counterexample to the UPEC proof if it creates a false interrelation between the transient and the main sequence (e.g., secret value being forwarded from the transient sequence to the main sequence). Due to the UPEC miter structure, any spurious behavior within each block is irrelevant for the proof. This means that the bookkeeping mechanisms (ROB, PU, FU instruction IDs) must be constrained to ensure the
@@ -34,7 +41,11 @@ Committable set: ROB slots with an ID that is before the root\_ID, i.e., ROB IDs
 
 Uncommittable set: ROB slots with an ID that is after the root\_ID, i.e., ROB IDs which are not between ROB head and root\_ID. Instructions in these slots cannot commit their results. They are invalidated when the misprediction signal is asserted.
 
-![](Documentation/figures/fig_rob_partitioning.png)
+
+| ![fig-3.png](https://raw.githubusercontent.com/mofadiheh/upec-boom-verification-suite/main/Documentation/figures/fig_rob_partitioning.png) | 
+|:--:| 
+| *Figure 3: Partitioning the ROB* | 
+
 
 Based on the partitioning of the ROB, we describe three sets of assumptions which together create an over-approximation of the microequivalence requirement which does not restrict the generality of the proof. They are denoted in the following by ME-1, ME-2,. . . , ME-6.
 
