@@ -116,8 +116,8 @@ We address this issue by partitioning the set of all speculation tags into two s
 Based on this partitioning we make sure that the uncommittable SPI instructions do not spawn tags within the set of committable tags.
 
 ##### ME-6 (Consistent Spawn Tag):
+*The spawn tag of every in-flight SPI instruction with ROB ID in the uncommittable set must not be equal to or above (according to program order) any of the tags in the committable tags set.*
 
-![](Documentation/figures/Eq2.png)
 
 Implementing these conditions in a property language is straight-forward and only involves identifying the buffers containing tags and IDs of in-flight instructions. A template for applying UPEC to out-of-order processors using microequivalence is available [here](https://github.com/mofadiheh/upec-boom-verification-suite/blob/main/Documentation/UPEC_OOO_Template.v). It is used as a basis for developing the BOOM Verification suite. 
 
