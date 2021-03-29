@@ -1,4 +1,5 @@
 # upec-boom-verification-suite
+ 
 This repository contains the verification suite to verify the *Berkeley Out-of-Order Machine (BOOM)* microarchitecture design against transient execution side-channel attacks (e.g., Spectre, Meltdown, MDS Attack). The verification suite is based on the Unique Program Execution Checking (UPEC), a formal HW security verification technique targeting microarchitectural vulnerabilities. The method is developed at the [chair of electronic design automation](https://www.eit.uni-kl.de/eis/) at Technische Universität Kaiserslautern (TUKL).   
 
 The verification suite verifies a design variant of BOOM based on the generated Verilog code at the Register Transfer Level (RTL). The verification environment is based on OneSpin 360 DV, however, the underlying method is tool-agnostic, meaning the property and proof script can be easily adapted to different commercial formal verification tools.   
@@ -15,6 +16,25 @@ A more detailed description of the employed formal verification technique can be
 
 [3]Fadiheh, M. R., Müller, J., Brinkmann, R., Mitra, S., Stoffel, D., & Kunz, W. (2020, July). A formal approach for detecting vulnerabilities to transient execution attacks in out-of-order processors. In 2020 57th ACM/IEEE Design Automation Conference (DAC) (pp. 1-6). IEEE.
 
+## Table of Contents
+
+  * [Basic Idea](#basic-idea)
+  * [General OOO Processor Model](#general-ooo-processor-model)
+  * [Microequivalence](#microequivalence)
+    + [ROB Consistency:](#rob-consistency-)
+        * [ME-1 (Root Instruction Pending):](#me-1--root-instruction-pending--)
+        * [ME-2 (Uncommittable Slots Invalidated):](#me-2--uncommittable-slots-invalidated--)
+        * [ME-3 (ROB tail Consistency):](#me-3--rob-tail-consistency--)
+    + [Functional Unit Consistency:](#functional-unit-consistency-)
+        * [ME-4 (FU Consistency):](#me-4--fu-consistency--)
+    + [Speculation Consistency:](#speculation-consistency-)
+        * [ME-5 (Consistent Speculation Tag):](#me-5--consistent-speculation-tag--)
+        * [ME-6 (Consistent Spawn Tag):](#me-6--consistent-spawn-tag--)
+  * [BOOM](#boom)
+  * [Microequivalence for BOOM](#microequivalence-for-boom)
+    + [ME-5 and ME-6](#me-5-and-me-6)
+  * [How to run the code](#how-to-run-the-code)
+  * [Repository Structure](#repository-structure)
 
 ## Basic Idea
 The basic idea of UPEC is to check if a set of confidential information, in short the secret, can have a subtle effect on the way a program executes. This is formalized in the notion of unique program execution.  A program executes uniquely w.r.t. a secret if and only if the sequence of valuations to the set of program visible state variables is independent of the value of the secret, in every clock cycle of program execution. In other words, UPEC checks for variations of behavior that are visible in the microarchitecture (also called “microarchitectural footprint”) but not at the ISA level.
@@ -42,7 +62,7 @@ Branches and other instructions which can initiate speculation (*SPI instruction
 
 ## Microequivalence
 The UPEC proof is an unbounded proof based on an unrolled circuit model with a symbolic initial state. The symbolic initial state enables the solver to explore all possible program contexts implicitly, and it is the contributing factor to achieve a conclusive proof result at the end. However, a symbolic initial state overapproximates the reachable state set of the system and may lead to spurious counterexamples. For processors of medium complexity with in-order pipelining, the miter construction of Fig. 1 ensures that only little effort is required for manually creating invariants to eliminate spurious counterexamples. However, this changes drastically when out-of-order processors are considered. The symbolic initial state can then include
-starting states, for example with inconsistent instruction identifiers across the pipeline, so that invalid execution orders are considered. As a result, secret-dependent microarchitectural observations can be generated which are spurious counterexamples to the UPEC property.
+starting states, for example with inconsistent instruction identifiers across the pipeline, so that invalid execution orders are considered. As a result, false security alarms can be generated which are spurious counterexamples to the UPEC property.
 
 To address this issue, instead of engaging in a tedious process of modeling all relevant functional behaviors by assertions (invariants), the proof is constrained by a new invariant, which we call Microequivalence. Microequivalence (conservatively) over-approximates correct Out-of-Order execution behavior of the processor in terms of certain data structures used in the bookkeeping mechanisms of OOO-execution.
 
