@@ -111,7 +111,7 @@ module upec_miter (
   assign auto_intsink_in_sync_0_2 = 1'b0;
 
 
-
+//Instantiation of SoC1
   BoomTile soc1(
 		.clock(clock), // @[:chipyard.TestHarness.MediumBoomConfig.fir@410017.4]
 		.reset(reset), // @[:chipyard.TestHarness.MediumBoomConfig.fir@410018.4]
@@ -157,6 +157,7 @@ module upec_miter (
 		.auto_tl_master_xing_out_e_bits_sink(auto_tl_master_xing_out_e_bits_sink_1) // @[:chipyard.TestHarness.MediumBoomConfig.fir@410019.4]
 	);
 
+  //Instantiation of Memory1
   TLMem #(.PROTECTED_ADDR(PROTECTED_ADDR)) mem1(
     .clock(clock),
     .reset(reset),
@@ -198,6 +199,7 @@ module upec_miter (
 
 	assign auto_tl_master_xing_out_d_bits_corrupt_1 = auto_tl_master_xing_out_d_bits_denied_1;
 
+  //Instantiation of SoC2
   BoomTile soc2(
 		.clock(clock), // @[:chipyard.TestHarness.MediumBoomConfig.fir@410017.4]
 		.reset(reset), // @[:chipyard.TestHarness.MediumBoomConfig.fir@410018.4]
@@ -243,6 +245,7 @@ module upec_miter (
 		.auto_tl_master_xing_out_e_bits_sink(auto_tl_master_xing_out_e_bits_sink_2) // @[:chipyard.TestHarness.MediumBoomConfig.fir@410019.4]
 	);
 
+  //Instantiation of Memory2
   TLMem #(.PROTECTED_ADDR(PROTECTED_ADDR)) mem2(
     .clock(clock),
     .reset(reset),
@@ -293,6 +296,7 @@ module upec_miter (
 //
 //For which of them do we need to check both instances?
 
+//Function that returns if the given ID in the ROB is a branch instruction
 	function automatic isSpi; // should check for both br and j and jal and jalr?
 		input [5:0] id;
 		begin
@@ -428,6 +432,7 @@ module upec_miter (
 		end
 	endfunction
 
+//Function that returns if the given ID in the ROB in SoC1 has its busy bit set
 	function automatic isPending_1;
 		input [5:0] id;
 		begin
@@ -498,6 +503,7 @@ module upec_miter (
 		end
 	endfunction
 
+  //Function that returns if the given ID in the ROB in SoC2 has its busy bit set
 	function automatic isPending_2;
 		input [5:0] id;
 		begin
@@ -568,6 +574,7 @@ module upec_miter (
 		end
 	endfunction
 
+  //Function that returns if the given ID in the ROB in SoC1 has its valid bit set
 	function automatic isValid_1;
 		input [5:0] id;
 		begin
@@ -638,6 +645,7 @@ module upec_miter (
 		end
 	endfunction
 
+  //Function that returns if the given ID in the ROB in SoC2 has its busy bit set
 	function automatic isValid_2;
 		input [5:0] id;
 		begin
@@ -708,11 +716,14 @@ module upec_miter (
 		end
 	endfunction
 
+  //Function that returns if the given row is in the committable set
+  //to be committable, the ID of the row must be above head and below or equal to root_id
 	function automatic isRobRowCommitable;
 		input [4:0] head_id;
 		input [5:0] root_id;
 		input [4:0] row;
 		begin
+      //since the ROB is a ringbuffer, we need to distinguish different cases for the position of head and root_id
 			if (head_id < root_id[5:1])
 			begin
 				isRobRowCommitable =  row >= head_id && row < root_id[5:1];
@@ -728,11 +739,14 @@ module upec_miter (
 		end
 	endfunction
 
+  //Function that returns if the given ID is in the committable set
+  //to be committable, the ID must be above head and below or equal to root_id
 	function automatic isRobIdCommitable;
 		input [4:0] head_id;
 		input [5:0] root_id;
 		input [5:0] id;
 		begin
+      //since the ROB is a ringbuffer, we need to distinguish different cases for the position of head and root_id
 			if (head_id < root_id[5:1])
 			begin
 				isRobIdCommitable =  id[5:1] >= head_id && id < root_id;
@@ -749,14 +763,19 @@ module upec_miter (
 		end
 	endfunction
 
+  //function that returns true if the given spawn_tag is greater than T_main
 	function automatic isSpawnTagGreater;
+    //4-bit branch tag(spawn_tag), which is the integer value of the level of speculation
 		input [3:0] spawn_tag;
 		input [11:0] main_tag;
 		reg [15:0] temp;
 		reg [11:0] temp2;
 		begin
+      //constructs a 12-bit branch mask by shifting a 1 by the value of the branch tag
 			temp = (16'h1 << spawn_tag);
 			temp2 = temp[11:0];
+      //check if the intersection of the branch mask and the main_tag (T_main) is 0
+      //then the spawn_tag is greater than T_main
 			isSpawnTagGreater = (temp2 & main_tag) == 12'h0;
 		end
 	endfunction
@@ -768,12 +787,15 @@ module upec_miter (
 
 	wire [11:0] root_br_mask; // should be symbolic // let's assume it is onehot
 	assign root_br_mask = 12'h080;
-//*******************************************//
+
+  //needed signals for misprediction of instruction at root_id
+  //see template for more information
 	reg mispred_flag_1;
 	reg mispred_happened_1;
 	reg mispred_flag_2;
 	reg mispred_happened_2;
 
+  //combinational logic for setting the flags
 	always @(posedge clock)
 	begin
 		if (reset)
@@ -785,6 +807,7 @@ module upec_miter (
 		end
 		else
 		begin
+      //if masks match set the flags
 			if ( (soc1.core.rob.io_brupdate_b1_mispredict_mask & root_br_mask) != 12'h0 && 	mispred_happened_1 == 1'b0 )
 			begin
 				mispred_flag_1 <= 1'b1;
@@ -792,9 +815,11 @@ module upec_miter (
 			end
 			else
 			begin
+        //unset this flag after one clock cycle
 				mispred_flag_1 <= 1'b0;
 			end
 
+      //if masks match set the flags
 			if ( (soc2.core.rob.io_brupdate_b1_mispredict_mask & root_br_mask) != 12'h0 && 	mispred_happened_2 == 1'b0 )
 			begin
 				mispred_flag_2 <= 1'b1;
@@ -802,32 +827,41 @@ module upec_miter (
 			end
 			else
 			begin
+        //unset this flag after one clock cycle
 				mispred_flag_2 <= 1'b0;
 			end
 
 		end
 	end
-//*******************************************//
-//************ME-1***************************//
 
+//****************************************************//
+//************ME-1(Main Branch Pending)***************//
+
+  //i) ROB slot with root_ID contains an SPI Instruction
 	wire ME_1_1;
+  //call to isSpi function
 	assign ME_1_1 = isSpi(root_id);
 
+  //ii) SPI is mispredicted
 	wire ME_1_2;
+  //SPI is mispredicted if it is never correct predicted
 	assign ME_1_2 = ( (mispred_happened_1 == 1'b0) ? ( (soc1.core.rob.io_brupdate_b1_resolve_mask & root_br_mask) == 12'h0 ) : 1'b1 ) &&
 									 ( (mispred_happened_2 == 1'b0) ? ( (soc2.core.rob.io_brupdate_b1_resolve_mask & root_br_mask) == 12'h0 ) : 1'b1 ) ;
 
+  //iii) SPI remains valid(pending) until misprediction is signaled by the prediction unit
 	wire ME_1_3;
-	assign ME_1_3 = ( (mispred_happened_1 == 1'b0) ? isPending_1(root_id) && isValid_1(root_id) : 1'b1 ) && ( (mispred_happened_2 == 1'b0) ? isPending_2(root_id) && isValid_2(root_id) : 1'b1 );
-	// look at busy and valid bit
+  // check busy and valid bit
+  assign ME_1_3 = ( (mispred_happened_1 == 1'b0) ? isPending_1(root_id) && isValid_1(root_id) : 1'b1 ) && ( (mispred_happened_2 == 1'b0) ? isPending_2(root_id) && isValid_2(root_id) : 1'b1 );
+
 	wire ME_1;
 	assign ME_1 = ME_1_1 && ME_1_2 && ME_1_3;
 
 
-//*******************************************//
-//************ME-2***************************//
+//****************************************************//
+//************ME-2(Uncommittable Slots Invalidated)***//
 
 	wire ME_2_1;
+  //after misprediction of SPI, in the next clock cycle every ROB slot in the uncommittable set is invalidated (SoC1)
 	assign ME_2_1 = (mispred_flag_1) ? ( ( isRobIdCommitable(soc1.core.rob.rob_head, root_id, 6'b000000 ) || soc1.core.rob.rob_val__0 == 1'b0 ) &&
 																			 ( isRobIdCommitable(soc1.core.rob.rob_head, root_id, 6'b000001 ) || soc1.core.rob.rob_val_1_0 == 1'b0 ) &&
 																			 ( isRobIdCommitable(soc1.core.rob.rob_head, root_id, 6'b000010 ) || soc1.core.rob.rob_val__1 == 1'b0 ) &&
@@ -895,6 +929,7 @@ module upec_miter (
 																			) : 1'b1;
 
 	wire ME_2_2;
+  //after misprediction of SPI, in the next clock cycle every ROB slot in the uncommittable set is invalidated (SoC2)
 	assign ME_2_2 = (mispred_flag_2) ? ( ( isRobIdCommitable(soc2.core.rob.rob_head, root_id, 6'b000000 ) || soc2.core.rob.rob_val__0 == 1'b0 ) &&
 																			 ( isRobIdCommitable(soc2.core.rob.rob_head, root_id, 6'b000001 ) || soc2.core.rob.rob_val_1_0 == 1'b0 ) &&
 																			 ( isRobIdCommitable(soc2.core.rob.rob_head, root_id, 6'b000010 ) || soc2.core.rob.rob_val__1 == 1'b0 ) &&
@@ -964,18 +999,21 @@ module upec_miter (
 	wire ME_2;
 	assign ME_2 = ME_2_1 && ME_2_2;
 
-//*******************************************//
-//************ME-3***************************//
+//****************************************************//
+//************ME-3(ROB tail Consistency)**************//
 
 	wire ME_3;
+  //until misprediction, ROB tail points to an uncommittable ROB slot
 	assign ME_3 = ( (mispred_happened_1 == 1'b0) ? ( isRobRowCommitable(soc1.core.rob.rob_head, root_id, soc1.core.rob.rob_tail) == 1'b0 ) : 1'b1 ) &&
 									( (mispred_happened_2 == 1'b0) ? ( isRobRowCommitable(soc2.core.rob.rob_head, root_id, soc2.core.rob.rob_tail) == 1'b0 ) : 1'b1 );
 
-//*******************************************//
-//************ME-4***************************//
-// Should we check for request valid bit?
-//
-//
+//****************************************************//
+//************ME-4(FU Consistency))*******************//
+//Should we check for request valid bit?
+//check for ever FU:
+//if ROB_IDs of the instructions currently being executed are equal, and commitable,
+//the operands must be equal
+
 	wire ME_4_alu;
 	assign ME_4_alu = ( soc1.core.csr_exe_unit.alu.io_req_bits_uop_rob_idx == soc2.core.csr_exe_unit.alu.io_req_bits_uop_rob_idx &&
 										(  soc1.core.csr_exe_unit.alu.io_req_bits_rs1_data != soc2.core.csr_exe_unit.alu.io_req_bits_rs1_data ||
@@ -1043,8 +1081,12 @@ module upec_miter (
 
 //*******************************************//
 //************ME-5 & ME-6********************//
-// write one combinational process for both ME-5 and ME-6
-//
+//write one combinational process for both ME-5 and ME-6
+//for every ROB slot or bookkeeping buffer:
+//check if stored ROB ID is committable
+//store branch mask in corresponding variable
+//set the other variable to default value (12'hfff for uncommitable tags, 12'h0 for committable tags)
+
 //Soc1
 
   wire [11:0] alu_T_2_com_1;
@@ -4312,8 +4354,8 @@ module upec_miter (
     end
   end
 
-//dcache buffers without direct rob_idx
-//check if ldq/stq are used and get rob_idx from ldq_idx/stq_idx
+//bookkeeping buffers without explicit rob_idx
+//check if loadqueue/storequeue are used and get ROB ID from ldq_idx/stq_idx
 
   wire [11:0] respq_uops_0_ldq_com_1;
   wire [11:0] respq_uops_0_ldq_uncom_1;
@@ -7286,6 +7328,7 @@ module upec_miter (
 	wire [11:0] uncommitable_masks_1;
 	wire [11:0] commitable_masks_1;
 
+//AND all uncommittable masks
 assign uncommitable_masks_1 = alu_T_2_uncom_1 &
 div_r_uncom_1 & exe_reg_0_uncom_1 & exe_reg_1_uncom_1 & exe_reg_2_uncom_1 & rrd_0_uncom_1 &
 rrd_1_uncom_1 & rrd_2_uncom_1 & bkq_0_uncom_1 & bkq_1_uncom_1 & bkq_2_uncom_1 &
@@ -7347,7 +7390,7 @@ mshrs_1_rpq_uops_8_stq_uncom_1 & mshrs_1_rpq_uops_9_stq_uncom_1 & mshrs_1_rpq_uo
 mshrs_1_rpq_uops_12_stq_uncom_1 & mshrs_1_rpq_uops_13_stq_uncom_1 & mshrs_1_rpq_uops_14_stq_uncom_1 & mshrs_1_rpq_uops_15_stq_uncom_1 &
 lsu_r_xcpt_uncom_1 & dcache_s1_req_ldq_uncom_1 & dcache_s1_req_stq_uncom_1 & dcache_s2_req_ldq_uncom_1 & dcache_s2_req_stq_uncom_1;
 
-
+//OR all committable masks
 assign commitable_masks_1 = root_br_mask | alu_T_2_com_1 |
 div_r_com_1 | exe_reg_0_com_1 | exe_reg_1_com_1 | exe_reg_2_com_1 | rrd_0_com_1 |
 rrd_1_com_1 | rrd_2_com_1 | bkq_0_com_1 | bkq_1_com_1 | bkq_2_com_1 |
@@ -7412,6 +7455,12 @@ lsu_r_xcpt_com_1 | dcache_s1_req_ldq_com_1 | dcache_s1_req_stq_com_1 | dcache_s2
 
 
 //***************************************//
+//write one combinational process for both ME-5 and ME-6
+//for every ROB slot or bookkeeping buffer:
+//check if stored ROB ID is committable
+//store branch mask in corresponding variable
+//set the other variable to default value (12'hfff for uncommitable tags, 12'h0 for committable tags)
+
 //Soc2
 //
 
@@ -10682,6 +10731,9 @@ lsu_r_xcpt_com_1 | dcache_s1_req_ldq_com_1 | dcache_s1_req_stq_com_1 | dcache_s2
   end
 
 
+  //bookkeeping buffers without explicit rob_idx
+  //check if loadqueue/storequeue are used and get ROB ID from ldq_idx/stq_idx
+
   wire [11:0] respq_uops_0_ldq_com_2;
   wire [11:0] respq_uops_0_ldq_uncom_2;
 
@@ -13652,6 +13704,7 @@ lsu_r_xcpt_com_1 | dcache_s1_req_ldq_com_1 | dcache_s1_req_stq_com_1 | dcache_s2
 	wire [11:0] commitable_masks_2;
 	wire [11:0] uncommitable_masks_2;
 
+//AND all uncommittable mask
 assign uncommitable_masks_2 = alu_T_2_uncom_2 &
 div_r_uncom_2 & exe_reg_0_uncom_2 & exe_reg_1_uncom_2 & exe_reg_2_uncom_2 & rrd_0_uncom_2 &
 rrd_1_uncom_2 & rrd_2_uncom_2 & bkq_0_uncom_2 & bkq_1_uncom_2 & bkq_2_uncom_2 &
@@ -13713,7 +13766,7 @@ mshrs_1_rpq_uops_8_stq_uncom_2 & mshrs_1_rpq_uops_9_stq_uncom_2 & mshrs_1_rpq_uo
 mshrs_1_rpq_uops_12_stq_uncom_2 & mshrs_1_rpq_uops_13_stq_uncom_2 & mshrs_1_rpq_uops_14_stq_uncom_2 & mshrs_1_rpq_uops_15_stq_uncom_2 &
 lsu_r_xcpt_uncom_2 & dcache_s1_req_ldq_uncom_2 & dcache_s1_req_stq_uncom_2 & dcache_s2_req_ldq_uncom_2 & dcache_s2_req_stq_uncom_2;
 
-
+//OR all committable masks
 assign commitable_masks_2 = root_br_mask | alu_T_2_com_2 |
 div_r_com_2 | exe_reg_0_com_2 | exe_reg_1_com_2 | exe_reg_2_com_2 | rrd_0_com_2 |
 rrd_1_com_2 | rrd_2_com_2 | bkq_0_com_2 | bkq_1_com_2 | bkq_2_com_2 |
@@ -13775,26 +13828,28 @@ mshrs_1_rpq_uops_8_stq_com_2 | mshrs_1_rpq_uops_9_stq_com_2 | mshrs_1_rpq_uops_1
 mshrs_1_rpq_uops_12_stq_com_2 | mshrs_1_rpq_uops_13_stq_com_2 | mshrs_1_rpq_uops_14_stq_com_2 | mshrs_1_rpq_uops_15_stq_com_2 |
 lsu_r_xcpt_com_2 | dcache_s1_req_ldq_com_2 | dcache_s1_req_stq_com_2 | dcache_s2_req_ldq_com_2 | dcache_s2_req_stq_com_2;
 
-
-//************ME-5***************************//
+//****************************************************//
+//************ME-5(Consistent Speculation Tag)********//
 
 	wire [11:0] uncommitable_masks;
 	wire ME_5;
 
+  //combine uncommittable masks of both SoCs
 	assign uncommitable_masks = uncommitable_masks_1 & uncommitable_masks_2;
 
+  //all uncommittable masks must have the same bit set as root_br_mask
+  //this means that every uncommittable instruction is speculated under the instruction at root_ID
 	assign ME_5 = ( (uncommitable_masks & root_br_mask) == root_br_mask );
 
-//*******************************************//
-//************ME-6***************************//
+//****************************************************//
+//************ME-6(Consistent Spawn Tag)**************//
 
 
 	wire ME_6_1;
 	wire ME_6_2;
 	wire ME_6;
 
-
-
+	//if a branch is resolved, its ROB ID must either be in the committable set or it must have a spawn tag greater than T_main
 	assign ME_6_1 = ( ( isRobIdCommitable(soc1.core.rob.rob_head, root_id, soc1.core.brinfos_0_uop_rob_idx) != 1'b1 ) ?
 											isSpawnTagGreater(soc1.core.brinfos_0_uop_br_tag, commitable_masks_1) : 1'b1) &&
 									( ( isRobIdCommitable(soc1.core.rob.rob_head, root_id, soc1.core.brinfos_1_uop_rob_idx) != 1'b1 ) ?
@@ -13807,15 +13862,15 @@ lsu_r_xcpt_com_2 | dcache_s1_req_ldq_com_2 | dcache_s1_req_stq_com_2 | dcache_s2
 
 	assign ME_6 = ME_6_1 && ME_6_2;
 
-//*******************************************//
-//************MicroEquivalence***************//
+//****************************************************//
+//************MicroEquivalence************************//
 
 	wire microequivalence;
 
 	assign microequivalence = ME_1 && ME_2 && ME_3 && ME_4 && ME_5 && ME_6;
 
-//*******************************************//
-//************L-Alert Definition*************//
+//****************************************************//
+//************L-Alert Definition**********************//
 
 	wire lAlert;
 
@@ -13826,20 +13881,13 @@ lsu_r_xcpt_com_2 | dcache_s1_req_ldq_com_2 | dcache_s1_req_stq_com_2 | dcache_s2
 
 endmodule
 
-
-
-
-
-
-
 	// This is based on the assumption that the ability of attacker to measure
 	// time is synchronized with instruction commit
 	// in case of RISC-V csr timers: csr reads are synchronizing instructions
-	// in case of external timer: signaling the outside world should never be
+	// in case of external timers: signaling the outside world should never be
 	// done speculatively
-	// It may not be the case in intel
 	// if timer reading is not synchronized: the upec L-Alert definition becomes
 	// even more simple, i.e., every physical register can be considered
 	// architectural, but it becomes extremely hard to have a secure variant
-	// it may not also make sense to allow sw to measure time in such a fine
-	// grained manner.
+	// it may not also make sense to allow SW to measure time in such a fine
+	// grained manner

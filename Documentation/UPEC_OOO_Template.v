@@ -265,7 +265,7 @@ end function;
 `define ME6 \
 	//Branch instructions in the transient sequence lead to a speculation level below the speculation level of T_main.
 	//This is meant to ensure a misprediction on a transient branch cannot
-	//affect the main sequence.
+	//affect the main sequence
 	(`misprediction_occurred ||
 	( is_uncommittable(`PU_1_rob_ID) ? is_uncommittable_tag(`PU_1_spawn_tag) : `true ) && \
 	( is_uncommittable(`PU_2_rob_ID) ? is_uncommittable_tag(`PU_2_spawn_tag) : `true ) \
