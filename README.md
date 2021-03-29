@@ -21,15 +21,15 @@ A more detailed description of the employed formal verification technique can be
   * [Basic Idea](#basic-idea)
   * [General OOO Processor Model](#general-ooo-processor-model)
   * [Microequivalence](#microequivalence)
-    + [ROB Consistency:](#rob-consistency-)
-        * [ME-1 (Root Instruction Pending):](#me-1--root-instruction-pending--)
-        * [ME-2 (Uncommittable Slots Invalidated):](#me-2--uncommittable-slots-invalidated--)
-        * [ME-3 (ROB tail Consistency):](#me-3--rob-tail-consistency--)
-    + [Functional Unit Consistency:](#functional-unit-consistency-)
-        * [ME-4 (FU Consistency):](#me-4--fu-consistency--)
-    + [Speculation Consistency:](#speculation-consistency-)
-        * [ME-5 (Consistent Speculation Tag):](#me-5--consistent-speculation-tag--)
-        * [ME-6 (Consistent Spawn Tag):](#me-6--consistent-spawn-tag--)
+    + [ROB Consistency:](#rob-consistency)
+        * [ME-1 (Root Instruction Pending):](#me-1-root-instruction-pending)
+        * [ME-2 (Uncommittable Slots Invalidated):](#me-2-uncommittable-slots-invalidated)
+        * [ME-3 (ROB tail Consistency):](#me-3-rob-tail-consistency)
+    + [Functional Unit Consistency:](#functional-unit-consistency)
+        * [ME-4 (FU Consistency):](#me-4-fu-consistency)
+    + [Speculation Consistency:](#speculation-consistency)
+        * [ME-5 (Consistent Speculation Tag):](#me-5-consistent-speculation-tag)
+        * [ME-6 (Consistent Spawn Tag):](#me-6-consistent-spawn-tag)
   * [BOOM](#boom)
   * [Microequivalence for BOOM](#microequivalence-for-boom)
     + [ME-5 and ME-6](#me-5-and-me-6)
@@ -94,9 +94,9 @@ Based on the partitioning of the ROB, we describe three sets of assumptions that
 The bookkeeping mechanism must be constrained to prevent spurious behaviors in speculative execution scenarios, in which instructions commit before speculation resolution. The following set of assumptions prevents the occurrence of spurious counterexamples in which instructions in the uncommittable ROB slots commit their results.
 
 ##### ME-1 (Root Instruction Pending):
-*(i) The ROB slot with root ID contains an SPI instruction.*
-*(ii) The SPI is mispredicted and*
-*(iii) it remains valid (pending) until its misprediction is signaled by the prediction unit.*
+*(i) The ROB slot with root ID contains an SPI instruction.*   
+*(ii) The SPI is mispredicted and*   
+*(iii) it remains valid (pending) until its misprediction is signaled by the prediction unit.*   
 
 Note that this condition restricts the search of the solvers to instruction sequences containing transient executions which are the root cause of the attacks targeted by UPEC. This bound on the search space contributes significantly to the tractability of UPEC.
 
