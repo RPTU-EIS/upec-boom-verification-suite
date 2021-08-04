@@ -191,6 +191,6 @@ This folder contains the UPEC_OOO_Template.v that can be used to apply the UPEC 
 - **Properties:**   
 This folder contains the UPEC property (upec_checker.vli) and all its components as for example the macro for the state equivalence.
 - **RTL:**   
-This folder contains all Verilog files as for example the BOOM design and also the miter circuit that is used as top module in the UPEC proof. Currently there is a patched and secure variant of BOOMv2 and the original version of BOOMv3.
+This folder contains all Verilog files as for example the BOOM design and also the miter circuit that is used as top module in the UPEC proof. Currently there is a patched and secure variant of BOOMv2 (work in progress) and the original version of BOOMv3.
 - **Repository root folder:**   
 This folder contains the other folders, the README.md and the .tcl scripts to run the experiment with the OneSpin 360 DV tool.
