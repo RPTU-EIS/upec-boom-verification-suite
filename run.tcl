@@ -1,4 +1,4 @@
-read_verilog -golden  -pragma_ignore {}  -version 2001 {RTL/BOOMv3 original/chipyard.TestHarness.MediumBoomConfig.top.v RTL/BOOMv3 original/chipyard.TestHarness.MediumBoomConfig.top.mems.v RTL/BOOMv3 original/miter.v RTL/BOOMv3 original/tilelink_mem.v RTL/BOOMv3 original/param.v }
+read_verilog -golden  -pragma_ignore {}  -version 2001 {RTL/BOOMv3_original/chipyard.TestHarness.MediumBoomConfig.top.v RTL/BOOMv3_original/chipyard.TestHarness.MediumBoomConfig.top.mems.v RTL/BOOMv3_original/miter.v RTL/BOOMv3_original/tilelink_mem.v RTL/BOOMv3_original/param.v }
 
 set_elaborate_option -golden -call_threshold 100 -loop_iter_threshold 300 -x_optimism -verilog_parameter {} -verilog_library_search_order {} -noverilog_library_resolution_ieee_compliance -vhdl_generic {} -vhdl_assertion_report_prefix {onespin} -black_box {} -black_box_empty_modules -black_box_missing_modules -black_box_library {} -black_box_component {} -top {Verilog!work.upec_miter}
 

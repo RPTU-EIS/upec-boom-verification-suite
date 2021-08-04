@@ -15731,6 +15731,7 @@ lsu_r_xcpt_com_2 | dcache_s1_req_ldq_com_2 | dcache_s1_req_stq_com_2 | dcache_s2
         isSpawnTagGreater(soc2.core.rob.io_enq_uops_1_br_tag, commitable_masks_2) : 1'b1)
       );
 
+
       //Copy valid flags in array
       wire rob1_vals [63:0];
 
@@ -15959,7 +15960,7 @@ lsu_r_xcpt_com_2 | dcache_s1_req_ldq_com_2 | dcache_s1_req_stq_com_2 | dcache_s2
 
       wire valid_br_tag_buffers;
       assign valid_br_tag_buffers = valid_issue_slots & valid_mispred_idx & valid_iregister_read;
-
+      
       //instruction at head must be non-speculative (br_mask == 0)
       wire no_speculative_head;
       assign no_speculative_head =
