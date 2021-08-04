@@ -1,4 +1,4 @@
-macro boolean state_equivalence := 
+macro boolean state_equivalence :=
   mem1/a_addr == mem2/a_addr &&
   mem1/a_param == mem2/a_param &&
   mem1/a_size == mem2/a_size &&
@@ -8979,8 +8979,13 @@ macro boolean state_equivalence :=
   soc1/dcache/_T_893_1 == soc2/dcache/_T_893_1 &&
   soc1/dcache/_T_936 == soc2/dcache/_T_936 &&
   soc1/dcache/_T_956 == soc2/dcache/_T_956 &&
+  soc1/dcache/data/_T_13 == soc2/dcache/data/_T_13 &&
+  soc1/dcache/data/_T_26 == soc2/dcache/data/_T_26 &&
+  soc1/dcache/data/_T_39 == soc2/dcache/data/_T_39 &&
+  soc1/dcache/data/_T_52 == soc2/dcache/data/_T_52 &&
   soc1/dcache/debug_sc_fail_addr == soc2/dcache/debug_sc_fail_addr &&
   soc1/dcache/debug_sc_fail_cnt == soc2/dcache/debug_sc_fail_cnt &&
+  soc1/dcache/meta_0/rst_cnt ==soc2/dcache/meta_0/rst_cnt &&
   soc1/dcache/lrsc_addr == soc2/dcache/lrsc_addr &&
   soc1/dcache/lrsc_count == soc2/dcache/lrsc_count &&
   soc1/dcache/s1_mshr_meta_read_way_en == soc2/dcache/s1_mshr_meta_read_way_en &&

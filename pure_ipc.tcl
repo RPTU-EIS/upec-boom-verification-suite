@@ -7,5 +7,5 @@ if {[get_mode] != "mv"} {
 }
 puts "The tool will now be set up so that only IPC checks are performed."
 set_check_option -default
-set_check_option -verbose -approver1_steps 2 -approver2_steps 0 -approver3_steps 0 -approver4_steps 0 -disprover1_steps 0 -prover1_steps 0 -prover2_steps 0 
+set_check_option -verbose -approver1_steps 1 -approver2_steps 0 -approver3_steps 0 -approver4_steps 0 -disprover1_steps 0 -prover1_steps 0 -prover2_steps 0 
 puts "(Done.)"

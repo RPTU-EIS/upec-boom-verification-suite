@@ -1,0 +1,4 @@
+source run.tcl
+source pure_ipc.tcl
+check  {ME_Invariant}
+debug ME_Invariant

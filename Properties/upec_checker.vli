@@ -1,7 +1,9 @@
 include "micro_soc_macro.vli";
 include "blackboxing.vli";
 
-macro integer K := 4; end macro;
+macro integer K := 5; end macro;
+
+macro integer L := 1; end macro;
 
 macro integer USER_MODE := 0; end macro;
 
@@ -9,6 +11,13 @@ macro unsigned secret_cache_tag := 20'h8abcd; end macro;
 
 constraint no_reset :=
   !reset;
+end constraint;
+
+constraint br_tag_in_bounds :=
+  (soc1/core/brinfos_0_uop_br_tag < 4'hc) &&
+  (soc1/core/brinfos_1_uop_br_tag < 4'hc) &&
+  (soc2/core/brinfos_0_uop_br_tag < 4'hc) &&
+  (soc2/core/brinfos_1_uop_br_tag < 4'hc);
 end constraint;
 
 macro boolean page_table_protection :=
@@ -46,8 +55,244 @@ macro boolean fp_pipeline_disabled :=
   ) == 1'b0;
 end macro;
 
+macro boolean equal_mispredicts :=
+  (soc1/core/brinfos_0_valid == soc2/core/brinfos_0_valid) &&
+  (soc1/core/brinfos_1_valid == soc2/core/brinfos_1_valid) &&
+  (soc1/core/brinfos_0_mispredict == soc2/core/brinfos_0_mispredict) &&
+  (soc1/core/brinfos_1_mispredict == soc2/core/brinfos_1_mispredict) &&
+  (soc1/core/brinfos_0_uop_br_tag == soc2/core/brinfos_0_uop_br_tag) &&
+  (soc1/core/brinfos_1_uop_br_tag == soc2/core/brinfos_1_uop_br_tag);
+end macro;
+
+macro boolean failed_loads_equal :=
+  (soc1/lsu/failed_loads_0 == soc2/lsu/failed_loads_0) &&
+  (soc1/lsu/failed_loads_1 == soc2/lsu/failed_loads_1) &&
+  (soc1/lsu/failed_loads_2 == soc2/lsu/failed_loads_2) &&
+  (soc1/lsu/failed_loads_3 == soc2/lsu/failed_loads_3) &&
+  (soc1/lsu/failed_loads_4 == soc2/lsu/failed_loads_4) &&
+  (soc1/lsu/failed_loads_5 == soc2/lsu/failed_loads_5) &&
+  (soc1/lsu/failed_loads_6 == soc2/lsu/failed_loads_6) &&
+  (soc1/lsu/failed_loads_7 == soc2/lsu/failed_loads_7) &&
+  (soc1/lsu/failed_loads_8 == soc2/lsu/failed_loads_8) &&
+  (soc1/lsu/failed_loads_9 == soc2/lsu/failed_loads_9) &&
+  (soc1/lsu/failed_loads_10 == soc2/lsu/failed_loads_10) &&
+  (soc1/lsu/failed_loads_11 == soc2/lsu/failed_loads_11) &&
+  (soc1/lsu/failed_loads_12 == soc2/lsu/failed_loads_12) &&
+  (soc1/lsu/failed_loads_13 == soc2/lsu/failed_loads_13) &&
+  (soc1/lsu/failed_loads_14 == soc2/lsu/failed_loads_14) &&
+  (soc1/lsu/failed_loads_15 == soc2/lsu/failed_loads_15);
+end macro;
+
+macro boolean cache_resp_equal :=
+  (soc1/dcache/cache_resp_0_valid == soc2/dcache/cache_resp_0_valid);
+end macro;
+
+macro boolean uncache_resp_equal :=
+  (soc1/dcache/uncache_resp_valid == soc2/dcache/uncache_resp_valid);
+end macro;
+
+macro boolean wb_forward_valid_equal :=
+  (soc1/lsu/wb_forward_valid_0 == soc2/lsu/wb_forward_valid_0);
+end macro;
+
+macro boolean dmem_resp_fired_equal :=
+  (soc1/lsu/dmem_resp_fired_0 == soc2/lsu/dmem_resp_fired_0);
+end macro;
+
+macro boolean mshrs_resp_arb_valid_equal :=
+  (soc1/dcache/mshrs/resp_arb/io_in_0_valid == soc2/dcache/mshrs/resp_arb/io_in_0_valid) &&
+  (soc1/dcache/mshrs/resp_arb/io_in_1_valid == soc2/dcache/mshrs/resp_arb/io_in_1_valid);
+end macro;
+
+macro boolean csr_insn_cease_equal :=
+  (soc1/core/csr/insn_cease == soc2/core/csr/insn_cease);
+end macro;
+
+macro boolean dis_hazards_equal :=
+  (soc1/core/dis_hazards_0 == soc2/core/dis_hazards_0) &&
+  (soc1/core/dis_hazards_1 == soc2/core/dis_hazards_1);
+end macro;
+
+macro boolean lcam_addr_equal :=
+  (soc1/lsu/lcam_addr_0 == soc2/lsu/lcam_addr_0);
+end macro;
+
+macro boolean br_tag_protection :=
+  ((soc1/core/brinfos_0_uop_br_tag == 4'h7) ? (soc1/core/brinfos_0_uop_rob_idx == root_id) : (soc1/core/brinfos_0_uop_rob_idx != root_id))&&
+  ((soc1/core/brinfos_1_uop_br_tag == 4'h7) ? (soc1/core/brinfos_1_uop_rob_idx == root_id) : (soc1/core/brinfos_1_uop_rob_idx != root_id))&&
+  ((soc2/core/brinfos_0_uop_br_tag == 4'h7) ? (soc2/core/brinfos_0_uop_rob_idx == root_id) : (soc2/core/brinfos_0_uop_rob_idx != root_id))&&
+  ((soc2/core/brinfos_1_uop_br_tag == 4'h7) ? (soc2/core/brinfos_1_uop_rob_idx == root_id) : (soc2/core/brinfos_1_uop_rob_idx != root_id))&&
+  (soc1/core/brinfos_0_uop_rob_idx == root_id ? soc1/core/brinfos_0_uop_br_tag == 4'h7 : soc1/core/brinfos_0_uop_br_tag != 4'h7) &&
+  (soc1/core/brinfos_1_uop_rob_idx == root_id ? soc1/core/brinfos_1_uop_br_tag == 4'h7 : soc1/core/brinfos_1_uop_br_tag != 4'h7) &&
+  (soc2/core/brinfos_0_uop_rob_idx == root_id ? soc2/core/brinfos_0_uop_br_tag == 4'h7 : soc2/core/brinfos_0_uop_br_tag != 4'h7) &&
+  (soc2/core/brinfos_1_uop_rob_idx == root_id ? soc2/core/brinfos_1_uop_br_tag == 4'h7 : soc2/core/brinfos_1_uop_br_tag != 4'h7);
+end macro;
+
+macro boolean addr_index_in_bounds :=
+  //fpiu_unit BranchKillableQueue
+  (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_71_addr < 7)&&
+  (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_71_addr < 7)&&
+  (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_82_addr < 7)&&
+  (soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_82_addr < 7)&&
+  //fpiu_unit BranchKillableQueue_1
+  (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/ram_data__T_35_addr < 3)&&
+  (soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/ram_data__T_35_addr < 3)&&
+  (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/ram_data__T_46_addr < 3)&&
+  (soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/ram_data__T_46_addr < 3);
+end macro;
+
+macro boolean rob_idx_correctly_set :=
+  (soc1/core/rob/rob_uop__0_rob_idx == 6'h0) && (soc2/core/rob/rob_uop__0_rob_idx == 6'h0) &&
+  (soc1/core/rob/rob_uop__1_rob_idx == 6'h2) && (soc2/core/rob/rob_uop__1_rob_idx == 6'h2) &&
+  (soc1/core/rob/rob_uop__2_rob_idx == 6'h4) && (soc2/core/rob/rob_uop__2_rob_idx == 6'h4) &&
+  (soc1/core/rob/rob_uop__3_rob_idx == 6'h6) && (soc2/core/rob/rob_uop__3_rob_idx == 6'h6) &&
+  (soc1/core/rob/rob_uop__4_rob_idx == 6'h8) && (soc2/core/rob/rob_uop__4_rob_idx == 6'h8) &&
+  (soc1/core/rob/rob_uop__5_rob_idx == 6'ha) && (soc2/core/rob/rob_uop__5_rob_idx == 6'ha) &&
+  (soc1/core/rob/rob_uop__6_rob_idx == 6'hc) && (soc2/core/rob/rob_uop__6_rob_idx == 6'hc) &&
+  (soc1/core/rob/rob_uop__7_rob_idx == 6'he) && (soc2/core/rob/rob_uop__7_rob_idx == 6'he) &&
+  (soc1/core/rob/rob_uop__8_rob_idx == 6'h10) && (soc2/core/rob/rob_uop__8_rob_idx == 6'h10) &&
+  (soc1/core/rob/rob_uop__9_rob_idx == 6'h12) && (soc2/core/rob/rob_uop__9_rob_idx == 6'h12) &&
+  (soc1/core/rob/rob_uop__10_rob_idx == 6'h14) && (soc2/core/rob/rob_uop__10_rob_idx == 6'h14) &&
+  (soc1/core/rob/rob_uop__11_rob_idx == 6'h16) && (soc2/core/rob/rob_uop__11_rob_idx == 6'h16) &&
+  (soc1/core/rob/rob_uop__12_rob_idx == 6'h18) && (soc2/core/rob/rob_uop__12_rob_idx == 6'h18) &&
+  (soc1/core/rob/rob_uop__13_rob_idx == 6'h1a) && (soc2/core/rob/rob_uop__13_rob_idx == 6'h1a) &&
+  (soc1/core/rob/rob_uop__14_rob_idx == 6'h1c) && (soc2/core/rob/rob_uop__14_rob_idx == 6'h1c) &&
+  (soc1/core/rob/rob_uop__15_rob_idx == 6'h1e) && (soc2/core/rob/rob_uop__15_rob_idx == 6'h1e) &&
+  (soc1/core/rob/rob_uop__16_rob_idx == 6'h20) && (soc2/core/rob/rob_uop__16_rob_idx == 6'h20) &&
+  (soc1/core/rob/rob_uop__17_rob_idx == 6'h22) && (soc2/core/rob/rob_uop__17_rob_idx == 6'h22) &&
+  (soc1/core/rob/rob_uop__18_rob_idx == 6'h24) && (soc2/core/rob/rob_uop__18_rob_idx == 6'h24) &&
+  (soc1/core/rob/rob_uop__19_rob_idx == 6'h26) && (soc2/core/rob/rob_uop__19_rob_idx == 6'h26) &&
+  (soc1/core/rob/rob_uop__20_rob_idx == 6'h28) && (soc2/core/rob/rob_uop__20_rob_idx == 6'h28) &&
+  (soc1/core/rob/rob_uop__21_rob_idx == 6'h2a) && (soc2/core/rob/rob_uop__21_rob_idx == 6'h2a) &&
+  (soc1/core/rob/rob_uop__22_rob_idx == 6'h2c) && (soc2/core/rob/rob_uop__22_rob_idx == 6'h2c) &&
+  (soc1/core/rob/rob_uop__23_rob_idx == 6'h2e) && (soc2/core/rob/rob_uop__23_rob_idx == 6'h2e) &&
+  (soc1/core/rob/rob_uop__24_rob_idx == 6'h30) && (soc2/core/rob/rob_uop__24_rob_idx == 6'h30) &&
+  (soc1/core/rob/rob_uop__25_rob_idx == 6'h32) && (soc2/core/rob/rob_uop__25_rob_idx == 6'h32) &&
+  (soc1/core/rob/rob_uop__26_rob_idx == 6'h34) && (soc2/core/rob/rob_uop__26_rob_idx == 6'h34) &&
+  (soc1/core/rob/rob_uop__27_rob_idx == 6'h36) && (soc2/core/rob/rob_uop__27_rob_idx == 6'h36) &&
+  (soc1/core/rob/rob_uop__28_rob_idx == 6'h38) && (soc2/core/rob/rob_uop__28_rob_idx == 6'h38) &&
+  (soc1/core/rob/rob_uop__29_rob_idx == 6'h3a) && (soc2/core/rob/rob_uop__29_rob_idx == 6'h3a) &&
+  (soc1/core/rob/rob_uop__30_rob_idx == 6'h3c) && (soc2/core/rob/rob_uop__30_rob_idx == 6'h3c) &&
+  (soc1/core/rob/rob_uop__31_rob_idx == 6'h3e) && (soc2/core/rob/rob_uop__31_rob_idx == 6'h3e) &&
+
+  (soc1/core/rob/rob_uop_1_0_rob_idx == 6'h1) && (soc2/core/rob/rob_uop_1_0_rob_idx == 6'h1) &&
+  (soc1/core/rob/rob_uop_1_1_rob_idx == 6'h3) && (soc2/core/rob/rob_uop_1_1_rob_idx == 6'h3) &&
+  (soc1/core/rob/rob_uop_1_2_rob_idx == 6'h5) && (soc2/core/rob/rob_uop_1_2_rob_idx == 6'h5) &&
+  (soc1/core/rob/rob_uop_1_3_rob_idx == 6'h7) && (soc2/core/rob/rob_uop_1_3_rob_idx == 6'h7) &&
+  (soc1/core/rob/rob_uop_1_4_rob_idx == 6'h9) && (soc2/core/rob/rob_uop_1_4_rob_idx == 6'h9) &&
+  (soc1/core/rob/rob_uop_1_5_rob_idx == 6'hb) && (soc2/core/rob/rob_uop_1_5_rob_idx == 6'hb) &&
+  (soc1/core/rob/rob_uop_1_6_rob_idx == 6'hd) && (soc2/core/rob/rob_uop_1_6_rob_idx == 6'hd) &&
+  (soc1/core/rob/rob_uop_1_7_rob_idx == 6'hf) && (soc2/core/rob/rob_uop_1_7_rob_idx == 6'hf) &&
+  (soc1/core/rob/rob_uop_1_8_rob_idx == 6'h11) && (soc2/core/rob/rob_uop_1_8_rob_idx == 6'h11) &&
+  (soc1/core/rob/rob_uop_1_9_rob_idx == 6'h13) && (soc2/core/rob/rob_uop_1_9_rob_idx == 6'h13) &&
+  (soc1/core/rob/rob_uop_1_10_rob_idx == 6'h15) && (soc2/core/rob/rob_uop_1_10_rob_idx == 6'h15) &&
+  (soc1/core/rob/rob_uop_1_11_rob_idx == 6'h17) && (soc2/core/rob/rob_uop_1_11_rob_idx == 6'h17) &&
+  (soc1/core/rob/rob_uop_1_12_rob_idx == 6'h19) && (soc2/core/rob/rob_uop_1_12_rob_idx == 6'h19) &&
+  (soc1/core/rob/rob_uop_1_13_rob_idx == 6'h1b) && (soc2/core/rob/rob_uop_1_13_rob_idx == 6'h1b) &&
+  (soc1/core/rob/rob_uop_1_14_rob_idx == 6'h1d) && (soc2/core/rob/rob_uop_1_14_rob_idx == 6'h1d) &&
+  (soc1/core/rob/rob_uop_1_15_rob_idx == 6'h1f) && (soc2/core/rob/rob_uop_1_15_rob_idx == 6'h1f) &&
+  (soc1/core/rob/rob_uop_1_16_rob_idx == 6'h21) && (soc2/core/rob/rob_uop_1_16_rob_idx == 6'h21) &&
+  (soc1/core/rob/rob_uop_1_17_rob_idx == 6'h23) && (soc2/core/rob/rob_uop_1_17_rob_idx == 6'h23) &&
+  (soc1/core/rob/rob_uop_1_18_rob_idx == 6'h25) && (soc2/core/rob/rob_uop_1_18_rob_idx == 6'h25) &&
+  (soc1/core/rob/rob_uop_1_19_rob_idx == 6'h27) && (soc2/core/rob/rob_uop_1_19_rob_idx == 6'h27) &&
+  (soc1/core/rob/rob_uop_1_20_rob_idx == 6'h29) && (soc2/core/rob/rob_uop_1_20_rob_idx == 6'h29) &&
+  (soc1/core/rob/rob_uop_1_21_rob_idx == 6'h2b) && (soc2/core/rob/rob_uop_1_21_rob_idx == 6'h2b) &&
+  (soc1/core/rob/rob_uop_1_22_rob_idx == 6'h2d) && (soc2/core/rob/rob_uop_1_22_rob_idx == 6'h2d) &&
+  (soc1/core/rob/rob_uop_1_23_rob_idx == 6'h2f) && (soc2/core/rob/rob_uop_1_23_rob_idx == 6'h2f) &&
+  (soc1/core/rob/rob_uop_1_24_rob_idx == 6'h31) && (soc2/core/rob/rob_uop_1_24_rob_idx == 6'h31) &&
+  (soc1/core/rob/rob_uop_1_25_rob_idx == 6'h33) && (soc2/core/rob/rob_uop_1_25_rob_idx == 6'h33) &&
+  (soc1/core/rob/rob_uop_1_26_rob_idx == 6'h35) && (soc2/core/rob/rob_uop_1_26_rob_idx == 6'h35) &&
+  (soc1/core/rob/rob_uop_1_27_rob_idx == 6'h37) && (soc2/core/rob/rob_uop_1_27_rob_idx == 6'h37) &&
+  (soc1/core/rob/rob_uop_1_28_rob_idx == 6'h39) && (soc2/core/rob/rob_uop_1_28_rob_idx == 6'h39) &&
+  (soc1/core/rob/rob_uop_1_29_rob_idx == 6'h3b) && (soc2/core/rob/rob_uop_1_29_rob_idx == 6'h3b) &&
+  (soc1/core/rob/rob_uop_1_30_rob_idx == 6'h3d) && (soc2/core/rob/rob_uop_1_30_rob_idx == 6'h3d) &&
+  (soc1/core/rob/rob_uop_1_31_rob_idx == 6'h3f) && (soc2/core/rob/rob_uop_1_31_rob_idx == 6'h3f)
+  ;
+end macro;
+
+macro boolean root_br_mispred :=
+  ((soc1/core/brinfos_0_valid) && (soc1/core/brinfos_0_uop_rob_idx == root_id) ? soc1/core/brinfos_0_mispredict : 1'b1) &&
+  ((soc1/core/brinfos_1_valid) && (soc1/core/brinfos_1_uop_rob_idx == root_id) ? soc1/core/brinfos_1_mispredict : 1'b1) &&
+  ((soc2/core/brinfos_0_valid) && (soc2/core/brinfos_0_uop_rob_idx == root_id) ? soc2/core/brinfos_0_mispredict : 1'b1) &&
+  ((soc2/core/brinfos_1_valid) && (soc2/core/brinfos_1_uop_rob_idx == root_id) ? soc2/core/brinfos_1_mispredict : 1'b1);
+end macro;
+
+macro boolean prevent_overwriting_valid_entries :=
+  (rob1_vals[{soc1/core/rob/rob_tail,1'b0}] ? !soc1/core/rob/io_enq_valids_0 : 1'b1) &&
+  (rob1_vals[{soc1/core/rob/rob_tail,1'b1}] ? !soc1/core/rob/io_enq_valids_1 : 1'b1) &&
+  (rob2_vals[{soc2/core/rob/rob_tail,1'b0}] ? !soc2/core/rob/io_enq_valids_0 : 1'b1) &&
+  (rob2_vals[{soc2/core/rob/rob_tail,1'b1}] ? !soc2/core/rob/io_enq_valids_1 : 1'b1);
+end macro;
+
+macro boolean full_empty_logic :=
+  (soc1/core/rob/io_rob_head_idx == soc1/core/rob/io_rob_tail_idx ? soc1/core/rob/full ^ soc1/core/rob/empty : 1'b1) &&
+  (soc2/core/rob/io_rob_head_idx == soc2/core/rob/io_rob_tail_idx ? soc2/core/rob/full ^ soc2/core/rob/empty : 1'b1);
+end macro;
+
+property ME_Invariant;
+  dependencies: no_reset, br_tag_in_bounds;
+
+  assume:
+    during[t, t+L]: blackboxing;
+
+    during[t, t+L]: secret_data_protected;
+
+    //during[t, t+L]: fp_pipeline_disabled;
+
+    at t: state_equivalence;
+
+    at t: init_mispred_signals;
+
+    during[t, t+L]: prevent_overwriting_valid_entries == 1'b1;
+
+    during[t, t+L-1]: microequivalence == 1'b1;
+
+    during[t, t+L]: consistent_br_masks == 1'b1;
+
+    during[t, t+L]: st_dep_mask_consistency == 1'b1;
+
+    during[t, t+L]: consistent_lsu_rob_idx == 1'b1;
+
+    during[t, t+L]: consistent_buffer_br_masks == 1'b1;
+
+    during[t, t+L]: br_tag_protection == 1'b1;
+
+    during[t, t+L]: rob_idx_correctly_set == 1'b1;
+
+    during[t, t+L]: (ldq_valid_check & stq_valid_check) == 1'b1;
+
+    during[t, t+L]: addr_index_in_bounds == 1'b1;
+
+    during[t, t+L]: com_mispred_kills_root == 1'b1;
+
+    during[t, t+L]: enqueue_uncom_br_tags == 1'b1;
+
+    during[t, t+L]: root_br_mispred == 1'b1;
+
+    during[t, t+L]: valid_br_tag_buffers == 1'b1;
+
+    during[t, t+L]: no_speculative_head == 1'b1;
+
+    during[t, t+L]: no_speculative_commit == 1'b1;
+
+    during[t, t+L]: consistent_uncommittable_masks == 1'b1;
+
+    during[t, t+L]: consistent_tail_rollback == 1'b1;
+
+    during[t, t+L]: full_empty_logic == 1'b1;
+
+    during[t, t+L]: consistent_rob_valid_flags == 1'b1;
+
+    during[t, t+L]: root_commits_after_misprediction == 1'b1;
+
+  prove:
+
+    at t+L: microequivalence == 1'b1;
+
+end property;
+
 property UPEC_boom;
-	dependencies: no_reset;
+	dependencies: no_reset, br_tag_in_bounds;
 
 	assume:
 		during[t, t+K]: blackboxing;
@@ -58,11 +303,71 @@ property UPEC_boom;
 
 		at t: init_mispred_signals;
 
-    during[t, t+K]: fp_pipeline_disabled;
-
 		during[t, t+K]: microequivalence == 1'b1;
 
+    during[t, t+K]: soc1/core/csr/reg_wfi == soc2/core/csr/reg_wfi;
+
+    during[t, t+K]: csr_insn_cease_equal == 1'b1;
+
+    during[t, t+K]: st_dep_mask_consistency == 1'b1;
+
+    during[t, t+K]: consistent_lsu_rob_idx == 1'b1;
+
+    during[t, t+K]: rob_idx_correctly_set == 1'b1;
+
+    during[t, t+K]: consistent_br_masks == 1'b1;
+
+    during[t, t+K]: consistent_buffer_br_masks == 1'b1;
+
+    during[t, t+K]: consistent_tail_rollback == 1'b1;
+
+    during[t, t+K]: (ldq_valid_check & stq_valid_check) == 1'b1;
+
+    during[t, t+K]: no_speculative_head == 1'b1;
+
+    during[t, t+K]: full_empty_logic == 1'b1;
+
+    during[t, t+K]: consistent_rob_valid_flags == 1'b1;
+
+    during[t, t+K]: no_speculative_commit == 1'b1;
+
+    /*during[t, t+K]: com_mispred_kills_root == 1'b1;
+
+    during[t, t+K]: enqueue_uncom_br_tags == 1'b1;
+
+    during[t, t+K]: root_br_mispred == 1'b1;
+
+    during[t, t+K]: valid_br_tag_buffers == 1'b1;
+
+    during[t, t+K]: addr_index_in_bounds == 1'b1;
+
+    during[t, t+K]: br_tag_protection == 1'b1;*/
+
+    //excluded attacks
+
+    during[t, t+K]: soc1/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid == soc2/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid;
+
+    during[t, t+K]: soc1/core/ll_wbarb/io_in_0_valid == soc2/core/ll_wbarb/io_in_0_valid;
+
+    during[t, t+K]: soc1/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid == soc2/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid;
+
+    during[t, t+K]: soc1/core/fp_pipeline/ll_wbarb/io_in_0_valid == soc2/core/fp_pipeline/ll_wbarb/io_in_0_valid;
+
+    during[t, t+K]: soc1/core/csr_exe_unit/alu_io_resp_valid == soc2/core/csr_exe_unit/alu_io_resp_valid;
+
+    during[t, t+K]: cache_resp_equal == 1'b1;
+
+    during[t, t+K]: uncache_resp_equal == 1'b1;
+
+    during[t, t+K]: wb_forward_valid_equal == 1'b1;
+
+    during[t, t+K]: dmem_resp_fired_equal == 1'b1;
+
+    during[t, t+K]: mshrs_resp_arb_valid_equal == 1'b1;
+
+    during[t, t+K]: dis_hazards_equal == 1'b1;
+
 	prove:
-		at t+K: lAlert == 1'b0 && lAlert_earlyAlarm == 1'b0;
+		at t+K: lAlert == 1'b0 /*&& lAlert_earlyAlarm == 1'b0*/;
 
 end property;

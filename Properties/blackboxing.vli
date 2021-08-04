@@ -18,78 +18,18 @@ macro boolean fregfile_blackboxing_soundness :=
   soc1/core/fp_pipeline/fregfile/io_write_ports_1_bits_data == soc2/core/fp_pipeline/fregfile/io_write_ports_1_bits_data;
 end macro;
 
-
-macro boolean iregfile_blackboxing :=
-  soc1/core/iregfile/io_read_ports_0_data == soc2/core/iregfile/io_read_ports_0_data &&
-  soc1/core/iregfile/io_read_ports_1_data == soc2/core/iregfile/io_read_ports_1_data &&
-  soc1/core/iregfile/io_read_ports_2_data == soc2/core/iregfile/io_read_ports_2_data &&
-  soc1/core/iregfile/io_read_ports_3_data == soc2/core/iregfile/io_read_ports_3_data &&
-  soc1/core/iregfile/io_read_ports_4_data == soc2/core/iregfile/io_read_ports_4_data &&
-  soc1/core/iregfile/io_read_ports_5_data == soc2/core/iregfile/io_read_ports_5_data;
+macro boolean data_array_dcache :=
+  (soc1/dcache/data/array_0_0/R0_data_0 == soc2/dcache/data/array_0_0/R0_data_0 || soc1/dcache/meta_0/tag_array/RW0_rdata_0[19:0] == SECRET_TAG || soc2/dcache/meta_0/tag_array/RW0_rdata_0[19:0] == SECRET_TAG) &&
+  (soc1/dcache/data/array_1_0/R0_data_0 == soc2/dcache/data/array_1_0/R0_data_0 || soc1/dcache/meta_0/tag_array/RW0_rdata_1[19:0] == SECRET_TAG || soc2/dcache/meta_0/tag_array/RW0_rdata_1[19:0] == SECRET_TAG) &&
+  (soc1/dcache/data/array_2_0/R0_data_0 == soc2/dcache/data/array_2_0/R0_data_0 || soc1/dcache/meta_0/tag_array/RW0_rdata_2[19:0] == SECRET_TAG || soc2/dcache/meta_0/tag_array/RW0_rdata_2[19:0] == SECRET_TAG) &&
+  (soc1/dcache/data/array_3_0/R0_data_0 == soc2/dcache/data/array_3_0/R0_data_0 || soc1/dcache/meta_0/tag_array/RW0_rdata_3[19:0] == SECRET_TAG || soc2/dcache/meta_0/tag_array/RW0_rdata_3[19:0] == SECRET_TAG) ;
 end macro;
 
-
-macro boolean iregfile_blackboxing_soundness :=
-  soc1/core/iregfile/io_read_ports_0_addr == soc2/core/iregfile/io_read_ports_0_addr &&
-  soc1/core/iregfile/io_read_ports_1_addr == soc2/core/iregfile/io_read_ports_1_addr &&
-  soc1/core/iregfile/io_read_ports_2_addr == soc2/core/iregfile/io_read_ports_2_addr &&
-  soc1/core/iregfile/io_read_ports_3_addr == soc2/core/iregfile/io_read_ports_3_addr &&
-  soc1/core/iregfile/io_read_ports_4_addr == soc2/core/iregfile/io_read_ports_4_addr &&
-  soc1/core/iregfile/io_read_ports_5_addr == soc2/core/iregfile/io_read_ports_5_addr &&
-  soc1/core/iregfile/io_write_ports_0_valid == soc2/core/iregfile/io_write_ports_0_valid &&
-  soc1/core/iregfile/io_write_ports_0_bits_addr == soc2/core/iregfile/io_write_ports_0_bits_addr &&
-  soc1/core/iregfile/io_write_ports_0_bits_data == soc2/core/iregfile/io_write_ports_0_bits_data &&
-  soc1/core/iregfile/io_write_ports_1_valid == soc2/core/iregfile/io_write_ports_1_valid &&
-  soc1/core/iregfile/io_write_ports_1_bits_addr == soc2/core/iregfile/io_write_ports_1_bits_addr &&
-  soc1/core/iregfile/io_write_ports_1_bits_data == soc2/core/iregfile/io_write_ports_1_bits_data &&
-  soc1/core/iregfile/io_write_ports_2_valid == soc2/core/iregfile/io_write_ports_2_valid &&
-  soc1/core/iregfile/io_write_ports_2_bits_addr == soc2/core/iregfile/io_write_ports_2_bits_addr &&
-  soc1/core/iregfile/io_write_ports_2_bits_data == soc2/core/iregfile/io_write_ports_2_bits_data;
-end macro;
-
-
-macro boolean data_blackboxing :=
-  (soc1/dcache/data/io_resp_0_0 == soc2/dcache/data/io_resp_0_0 || soc1/dcache/meta_0/io_resp_0_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_0_tag == SECRET_TAG) &&
-  (soc1/dcache/data/io_resp_0_1 == soc2/dcache/data/io_resp_0_1 || soc1/dcache/meta_0/io_resp_1_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_1_tag == SECRET_TAG) &&
-  (soc1/dcache/data/io_resp_0_2 == soc2/dcache/data/io_resp_0_2 || soc1/dcache/meta_0/io_resp_2_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_2_tag == SECRET_TAG) &&
-  (soc1/dcache/data/io_resp_0_3 == soc2/dcache/data/io_resp_0_3 || soc1/dcache/meta_0/io_resp_3_tag == SECRET_TAG || soc2/dcache/meta_0/io_resp_3_tag == SECRET_TAG);
-end macro;
-
-
-macro boolean data_blackboxing_soundness :=
-  soc1/dcache/data/io_read_0_valid == soc2/dcache/data/io_read_0_valid &&
-  soc1/dcache/data/io_read_0_bits_way_en == soc2/dcache/data/io_read_0_bits_way_en &&
-  soc1/dcache/data/io_read_0_bits_addr == soc2/dcache/data/io_read_0_bits_addr &&
-  soc1/dcache/data/io_write_valid == soc2/dcache/data/io_write_valid &&
-  soc1/dcache/data/io_write_bits_way_en == soc2/dcache/data/io_write_bits_way_en &&
-  soc1/dcache/data/io_write_bits_addr == soc2/dcache/data/io_write_bits_addr &&
-  soc1/dcache/data/io_write_bits_wmask == soc2/dcache/data/io_write_bits_wmask &&
-  soc1/dcache/data/io_write_bits_data == soc2/dcache/data/io_write_bits_data;
-end macro;
-
-
-macro boolean meta_0_blackboxing :=
-  soc1/dcache/meta_0/io_read_ready == soc2/dcache/meta_0/io_read_ready &&
-  soc1/dcache/meta_0/io_write_ready == soc2/dcache/meta_0/io_write_ready &&
-  soc1/dcache/meta_0/io_resp_0_coh_state == soc2/dcache/meta_0/io_resp_0_coh_state &&
-  soc1/dcache/meta_0/io_resp_0_tag == soc2/dcache/meta_0/io_resp_0_tag &&
-  soc1/dcache/meta_0/io_resp_1_coh_state == soc2/dcache/meta_0/io_resp_1_coh_state &&
-  soc1/dcache/meta_0/io_resp_1_tag == soc2/dcache/meta_0/io_resp_1_tag &&
-  soc1/dcache/meta_0/io_resp_2_coh_state == soc2/dcache/meta_0/io_resp_2_coh_state &&
-  soc1/dcache/meta_0/io_resp_2_tag == soc2/dcache/meta_0/io_resp_2_tag &&
-  soc1/dcache/meta_0/io_resp_3_coh_state == soc2/dcache/meta_0/io_resp_3_coh_state &&
-  soc1/dcache/meta_0/io_resp_3_tag == soc2/dcache/meta_0/io_resp_3_tag;
-end macro;
-
-
-macro boolean meta_0_blackboxing_soundness :=
-  soc1/dcache/meta_0/io_read_valid == soc2/dcache/meta_0/io_read_valid &&
-  soc1/dcache/meta_0/io_read_bits_idx == soc2/dcache/meta_0/io_read_bits_idx &&
-  soc1/dcache/meta_0/io_write_valid == soc2/dcache/meta_0/io_write_valid &&
-  soc1/dcache/meta_0/io_write_bits_idx == soc2/dcache/meta_0/io_write_bits_idx &&
-  soc1/dcache/meta_0/io_write_bits_way_en == soc2/dcache/meta_0/io_write_bits_way_en &&
-  soc1/dcache/meta_0/io_write_bits_data_coh_state == soc2/dcache/meta_0/io_write_bits_data_coh_state &&
-  soc1/dcache/meta_0/io_write_bits_data_tag == soc2/dcache/meta_0/io_write_bits_data_tag;
+macro boolean tag_array_dcache :=
+  (soc1/dcache/meta_0/tag_array/RW0_rdata_0 == soc2/dcache/meta_0/tag_array/RW0_rdata_0) &&
+  (soc1/dcache/meta_0/tag_array/RW0_rdata_1 == soc2/dcache/meta_0/tag_array/RW0_rdata_1) &&
+  (soc1/dcache/meta_0/tag_array/RW0_rdata_2 == soc2/dcache/meta_0/tag_array/RW0_rdata_2) &&
+  (soc1/dcache/meta_0/tag_array/RW0_rdata_3 == soc2/dcache/meta_0/tag_array/RW0_rdata_3) ;
 end macro;
 
 
@@ -642,8 +582,8 @@ macro boolean dataArrayWay_3_blackboxing_soundness :=
 end macro;
 
 macro boolean blackboxing :=
- /*fregfile_blackboxing && iregfile_blackboxing &&*/ data_blackboxing && meta_0_blackboxing 
-&& banked_predictors_0_blackboxing && fb_blackboxing && ftq_blackboxing && tlb_blackboxing && dtlb_blackboxing && l2_tlb_ram_blackboxing && 
+ fregfile_blackboxing && /*iregfile_blackboxing &&*/ data_array_dcache && tag_array_dcache
+&& banked_predictors_0_blackboxing && fb_blackboxing && ftq_blackboxing && tlb_blackboxing && dtlb_blackboxing && l2_tlb_ram_blackboxing &&
 tag_array_blackboxing && dataArrayWay_0_blackboxing && dataArrayWay_1_blackboxing && dataArrayWay_2_blackboxing && dataArrayWay_3_blackboxing;
 
 end macro;
