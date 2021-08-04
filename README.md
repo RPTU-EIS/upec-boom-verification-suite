@@ -33,6 +33,8 @@ A more detailed description of the employed formal verification technique can be
   * [BOOM](#boom)
   * [Microequivalence for BOOM](#microequivalence-for-boom)
     + [ME-5 and ME-6](#me-5-and-me-6)
+  * [Further Invariants](#further-invariants)
+    + [Load-Store Dependencies](#load-store-dependencies)
   * [How to run the code](#how-to-run-the-code)
   * [Repository Structure](#repository-structure)
 
@@ -146,9 +148,9 @@ The Berkeley Out-of-Order Machine (BOOM) is a synthesizable and parameterizable 
 The documentation for BOOM can be found here : [https://docs.boom-core.org/en/latest/index.html](https://docs.boom-core.org/en/latest/index.html)
 
 ## Microequivalence for BOOM
-In our experiment, the Verilog code for the design was generated using the medium performance configuration (MediumBoomConfig). In this configuration, the core can issue two instructions per clock cycle and the reorder buffer (ROB) consists of two banks each holding up to 32 entries. The core has two prediction units that compute if the branch predictions were correct.
+In our experiment, the Verilog code for the design was generated using the medium performance configuration (MediumBoomConfig) for BOOMv3. In this configuration, the core can issue two instructions per clock cycle and the reorder buffer (ROB) consists of two banks each holding up to 32 entries. The core has two prediction units that compute if the branch predictions were correct.
 
-Each instruction also has a 12-bit speculation tag (in BOOM it is called branch mask (br\_mask) ), that specifies on which preceding branch instructions this instruction depends. Each set bit in the branch mask represents a dependency to the branch with the level of speculation corresponding to the position of the bit. This means if a branch resolves as mispredicted all instructions that have the corresponding bit in their branch mask set, need to be discarded. If a branch resolves as correctly predicted the bit can simply be cleared.  
+Each instruction also has a 12-bit speculation tag (in BOOM it is called branch mask (br\_mask)), that specifies on which preceding branch instructions this instruction depends. Each set bit in the branch mask represents a dependency to the branch with the level of speculation corresponding to the position of the bit. This means if a branch resolves as mispredicted all instructions that have the corresponding bit in their branch mask set, need to be discarded. If a branch resolves as correctly predicted the bit can simply be cleared.  
 
 In the following, more concrete information is provided on how to specify ME-5 and ME-6 in particular for the BOOM microarchitecture.
 
@@ -160,18 +162,26 @@ For ME-5, we only need to compute the intersection of all the uncommittable tags
 
 For ME-6, we need to consider the union of all committable tags. Thus, the speculation tags (branch masks) of all committable instructions in the pipeline bookkeeping buffers are ORed together to compute the set of committable tags. For all the buffers which hold an uncommittable instruction, a don't care value is considered (12'h000).
 
-
 For ME-5 to hold, the bitwise conjunction of the uncommittable tags and the T\_main must be equal to T\_main. This means that all instructions in the uncommittable set must have a speculation level below the speculation level of the instruction at root\_id.
 
 For ME-6 to hold, we need to check for every branch resolution of the prediction unit, if the branch is an uncommittable instruction, the bitwise disjunction between its spawn tag and the committable tags must be zero. This means that misprediction of this branch will not affect any of the committable instructions.
 
+## Further Invariants
+Despite using microequivalence, there are still false counterexamples to the UPEC property for BOOM. During our experiments we developed the following invariants to exclude unreachable behaviours.
 
+### Load-Store Dependencies
+It is possible to split the load queue(LDQ) and the store queue(STQ) into a committable and an uncommittable set, similar to the ROB. It has to be ensured that the (un-)committable loads/stores have a corresponding (un-)committable ROB ID to avoid false counterexamples that would lead to secret-dependent ordering failures where a younger(transient) instruction affects the execution of an older(committable) instruction.
+
+For this reason we implemented the invariant *consistent_lsu_rob_idx*. It first finds the first uncommittable entry in each of the queues by comparing the ROB ID of each entry with root_ID. The comparison starts at the head of the LDQ/STQ and as soon as an uncommittable load/store is found, it will mark the border between the committable and the uncommittable set. Afterwards we check for every entry of the LDQ/STQ if it is older than the first found uncommittable load/store. If it is older its ROB ID has to belong to the committable set, if not its ROB ID hast to belong to the uncommittable set.
+
+Another possibility for false counterexamples arises from the fact that each LDQ entry stores a so-called store mask that gives information about all older store instructions that the given load depends on. Since these masks are not constrained in the initial state of the UPEC proof, this can lead to a situation where a committable load depends on a younger uncommittable store which is of course an unreachable behaviour. We are getting rid of this by adding the invariant *st_dep_mask_consistency* that ensures that all committable loads can only depend on committable stores. This is implemented by gathering all uncommittable stores and making sure that every committable load does not have a store mask that overlaps with one of the uncommittable store masks.
 
 ## How to run the code
 For the experiment, we used the OneSpin 360 DV verification tool. After starting OneSpin the following commands need to be executed in the OneSpin shell:
 > source run.tcl    
 > source pure_ipc.tcl
 
+Then you can check the property UPEC_boom.
 It should be noted that the property will fail since the design is vulnerable to different variants of the Spectre Attack.
 
 ## Repository Structure
@@ -181,6 +191,6 @@ This folder contains the UPEC_OOO_Template.v that can be used to apply the UPEC 
 - **Properties:**   
 This folder contains the UPEC property (upec_checker.vli) and all its components as for example the macro for the state equivalence.
 - **RTL:**   
-This folder contains all Verilog files as for example the BOOM design and also the miter circuit that is used as top module in the UPEC proof.
+This folder contains all Verilog files as for example the BOOM design and also the miter circuit that is used as top module in the UPEC proof. Currently there is a patched and secure variant of BOOMv2 and the original version of BOOMv3.
 - **Repository root folder:**   
 This folder contains the other folders, the README.md and the .tcl scripts to run the experiment with the OneSpin 360 DV tool.
