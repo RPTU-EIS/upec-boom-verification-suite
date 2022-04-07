@@ -1,9 +1,14 @@
 include "micro_soc_macro.vli";
+include "micro_soc_macro_except_mispredicts.vli";
 include "blackboxing.vli";
 
 macro integer K := 5; end macro;
 
 macro integer L := 1; end macro;
+
+macro integer N := 6; end macro;
+
+macro integer O := 4; end macro;
 
 macro integer USER_MODE := 0; end macro;
 
@@ -131,7 +136,7 @@ end macro;
 macro boolean addr_index_in_bounds :=
   //fpiu_unit BranchKillableQueue
   (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_71_addr < 7)&&
-  (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_71_addr < 7)&&
+  (soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_71_addr < 7)&&
   (soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_82_addr < 7)&&
   (soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue/ram_data__T_82_addr < 7)&&
   //fpiu_unit BranchKillableQueue_1
@@ -217,74 +222,112 @@ macro boolean root_br_mispred :=
   ((soc2/core/brinfos_1_valid) && (soc2/core/brinfos_1_uop_rob_idx == root_id) ? soc2/core/brinfos_1_mispredict : 1'b1);
 end macro;
 
-macro boolean prevent_overwriting_valid_entries :=
-  (rob1_vals[{soc1/core/rob/rob_tail,1'b0}] ? !soc1/core/rob/io_enq_valids_0 : 1'b1) &&
-  (rob1_vals[{soc1/core/rob/rob_tail,1'b1}] ? !soc1/core/rob/io_enq_valids_1 : 1'b1) &&
-  (rob2_vals[{soc2/core/rob/rob_tail,1'b0}] ? !soc2/core/rob/io_enq_valids_0 : 1'b1) &&
-  (rob2_vals[{soc2/core/rob/rob_tail,1'b1}] ? !soc2/core/rob/io_enq_valids_1 : 1'b1);
-end macro;
-
 macro boolean full_empty_logic :=
   (soc1/core/rob/io_rob_head_idx == soc1/core/rob/io_rob_tail_idx ? soc1/core/rob/full ^ soc1/core/rob/empty : 1'b1) &&
   (soc2/core/rob/io_rob_head_idx == soc2/core/rob/io_rob_tail_idx ? soc2/core/rob/full ^ soc2/core/rob/empty : 1'b1);
+end macro;
+
+macro boolean rob_full_pointers :=
+	(soc1/core/rob/full ? (soc1/core/rob/io_rob_head_idx == soc1/core/rob/io_rob_tail_idx) || (soc1/core/rob/io_rob_head_idx == (soc1/core/rob/io_rob_tail_idx + 1) mod 64) : 1'b1) &&
+	(soc2/core/rob/full ? (soc2/core/rob/io_rob_head_idx == soc2/core/rob/io_rob_tail_idx) || (soc2/core/rob/io_rob_head_idx == (soc2/core/rob/io_rob_tail_idx + 1) mod 64) : 1'b1);
 end macro;
 
 property ME_Invariant;
   dependencies: no_reset, br_tag_in_bounds;
 
   assume:
+  
+    //UPEC assumptions
+    
     during[t, t+L]: blackboxing;
-
-    during[t, t+L]: secret_data_protected;
-
-    //during[t, t+L]: fp_pipeline_disabled;
 
     at t: state_equivalence;
 
-    at t: init_mispred_signals;
-
-    during[t, t+L]: prevent_overwriting_valid_entries == 1'b1;
-
     during[t, t+L-1]: microequivalence == 1'b1;
 
-    during[t, t+L]: consistent_br_masks == 1'b1;
-
-    during[t, t+L]: st_dep_mask_consistency == 1'b1;
-
-    during[t, t+L]: consistent_lsu_rob_idx == 1'b1;
-
-    during[t, t+L]: consistent_buffer_br_masks == 1'b1;
-
+    //assumptions needed for microequivalence scenario
+    
     during[t, t+L]: br_tag_protection == 1'b1;
-
-    during[t, t+L]: rob_idx_correctly_set == 1'b1;
-
-    during[t, t+L]: (ldq_valid_check & stq_valid_check) == 1'b1;
-
-    during[t, t+L]: addr_index_in_bounds == 1'b1;
-
-    during[t, t+L]: com_mispred_kills_root == 1'b1;
 
     during[t, t+L]: enqueue_uncom_br_tags == 1'b1;
 
     during[t, t+L]: root_br_mispred == 1'b1;
 
-    during[t, t+L]: valid_br_tag_buffers == 1'b1;
-
-    during[t, t+L]: no_speculative_head == 1'b1;
-
-    during[t, t+L]: no_speculative_commit == 1'b1;
-
     during[t, t+L]: consistent_uncommittable_masks == 1'b1;
+    
+    during[t, t+L]: st_dep_mask_consistency == 1'b1;
+    
+    at t: init_mispred_signals;
 
-    during[t, t+L]: consistent_tail_rollback == 1'b1;
+    during[t, t+L]: secret_data_protected;
 
-    during[t, t+L]: full_empty_logic == 1'b1;
+    //pure functional assumptions, checked with simulation
+    
+    during[t, t+L]: (consistent_valid_flags_1 && consistent_valid_flags_2) == 1'b1;
 
-    during[t, t+L]: consistent_rob_valid_flags == 1'b1;
+    during[t, t+L]: (consistent_tail_rollback_1 && consistent_tail_rollback_2) == 1'b1;
 
-    during[t, t+L]: root_commits_after_misprediction == 1'b1;
+    during[t, t+L]: (full_empty_logic_1 && full_empty_logic_2 && empty_logic_1 && empty_logic_2 && full_logic_1 && full_logic_2) == 1'b1;
+    
+    during[t, t+L]: (valid_issue_slots_1 && valid_mispred_idx_1 && valid_iregister_read_1 && valid_issue_slots_2 && valid_mispred_idx_2 && valid_iregister_read_2) == 1'b1;
 
+    during[t, t+L]: (no_speculative_head_1 && no_speculative_head_2) == 1'b1;
+
+    during[t, t+L]: (no_speculative_commit_1 && no_speculative_commit_2) == 1'b1;
+
+    during[t, t+L]: (ldq_check_invalidated_entries_1 && ldq_check_invalidated_entries_2 && stq_check_invalidated_entries_1 && stq_check_invalidated_entries_2) == 1'b1;
+    
+    during[t, t+L]: (consistent_branch_masks_1 && consistent_branch_masks_2) == 1'b1;
+    
+    during[t, t+L]: (consistent_buffer_br_masks_1 && consistent_buffer_br_masks_2) == 1'b1;
+    
+    during[t, t+L]: (prevent_overwriting_valid_entries_1 && prevent_overwriting_valid_entries_2) == 1'b1;
+    
+    during[t, t+L]: addr_index_in_bounds == 1'b1;
+    
+    during[t, t+L]: (lcam_ldq_idx_valid_1 && lcam_ldq_idx_valid_2 && lcam_stq_idx_valid_1 && lcam_stq_idx_valid_2) == 1'b1;
+    
+    during[t, t+L]: (ldq_consistent_rob_idx_1 && ldq_consistent_rob_idx_2 && stq_consistent_rob_idx_1 && stq_consistent_rob_idx_2) == 1'b1;
+    
+    during[t, t+L]: (consistent_stq_committed_1 && consistent_stq_committed_2) == 1'b1;
+    
+    during[t, t+L]: (committed_stores_not_speculative_1 && committed_stores_not_speculative_2) == 1'b1;
+    
+    during[t, t+L]: (!speculative_store_rpq_1 && !speculative_store_rpq_2) == 1'b1;
+    
+    during[t, t+L]: (!speculative_store_s1_s2_1 && !speculative_store_s1_s2_2) == 1'b1;
+            
+    during[t, t+L]: (fpiu_BranchKillableQueue_1_not_committed_1 && fpiu_BranchKillableQueue_1_not_committed_2) == 1'b1;
+    
+    during[t, t+L]: (fdivsqrt_valid_consistency_1 && fdivsqrt_valid_consistency_2) == 1'b1;
+    
+    during[t, t+L]: (div_state_1 && div_state_2) == 1'b1;
+    
+    during[t, t+L]: (ldq_entries_not_using_stq_1 && ldq_entries_not_using_stq_2 && stq_entries_not_using_ldq_1 && stq_entries_not_using_ldq_2) == 1'b1;
+    
+    during[t, t+L]: (BranchKillableQueue_empty_1 && BranchKillableQueue_empty_2) == 1'b1;
+    
+    during[t, t+L]: (BranchKillableQueue_pointers_valid_1 && BranchKillableQueue_pointers_valid_2) == 1'b1;
+    
+    during[t, t+L]: (buffers_equal_ROB_1 && buffers_equal_ROB_2) == 1'b1;
+    
+    during[t, t+L]: (unique_stq_idx_1 && unique_stq_idx_2) == 1'b1;
+    
+    during[t, t+L]: (ROB_uops_equal_STQ_1 && ROB_uops_equal_STQ_2 && ROB_uops_equal_LDQ_1 && ROB_uops_equal_LDQ_2 && STQ_uops_equals_ROB_1 && STQ_uops_equals_ROB_2 && LDQ_uops_equals_ROB_1 && LDQ_uops_equals_ROB_2) == 1'b1;
+    
+    during[t, t+L]: (stdf_clr_bsy_uses_stq_1 && stdf_clr_bsy_uses_stq_2) == 1'b1;
+    
+    //currently unused
+    //during[t, t+L]: rob_full_pointers;
+
+    //during[t, t+L]: root_commits_after_misprediction == 1'b1;    
+    
+    //during[t, t+L]: com_mispred_kills_root == 1'b1;
+    
+    //during[t, t+L]: rob_idx_correctly_set == 1'b1;
+
+    //during[t, t+L]: consistent_lsu_rob_idx == 1'b1;
+        
   prove:
 
     at t+L: microequivalence == 1'b1;
@@ -305,69 +348,638 @@ property UPEC_boom;
 
 		during[t, t+K]: microequivalence == 1'b1;
 
-    during[t, t+K]: soc1/core/csr/reg_wfi == soc2/core/csr/reg_wfi;
+		during[t, t+K]: soc1/core/csr/reg_wfi == soc2/core/csr/reg_wfi;
 
-    during[t, t+K]: csr_insn_cease_equal == 1'b1;
+		during[t, t+K]: csr_insn_cease_equal == 1'b1;
 
-    during[t, t+K]: st_dep_mask_consistency == 1'b1;
+		during[t, t+K]: st_dep_mask_consistency == 1'b1;
 
-    during[t, t+K]: consistent_lsu_rob_idx == 1'b1;
+		//during[t, t+K]: consistent_lsu_rob_idx == 1'b1;
 
-    during[t, t+K]: rob_idx_correctly_set == 1'b1;
+    		//during[t, t+K]: rob_idx_correctly_set == 1'b1;
 
-    during[t, t+K]: consistent_br_masks == 1'b1;
+		during[t, t+K]: (consistent_branch_masks_1 && consistent_branch_masks_2) == 1'b1;
 
-    during[t, t+K]: consistent_buffer_br_masks == 1'b1;
+		during[t, t+K]: (consistent_buffer_br_masks_1 && consistent_buffer_br_masks_2) == 1'b1;
 
-    during[t, t+K]: consistent_tail_rollback == 1'b1;
+		during[t, t+K]: (consistent_tail_rollback_1 && consistent_tail_rollback_2) == 1'b1;
 
-    during[t, t+K]: (ldq_valid_check & stq_valid_check) == 1'b1;
+		during[t, t+K]: (ldq_check_invalidated_entries_1 && ldq_check_invalidated_entries_2 && stq_check_invalidated_entries_1 && stq_check_invalidated_entries_2) == 1'b1;
 
-    during[t, t+K]: no_speculative_head == 1'b1;
+		during[t, t+K]: (full_empty_logic_1 && full_empty_logic_2 && empty_logic_1 && empty_logic_2 && full_logic_1 && full_logic_2) == 1'b1;
 
-    during[t, t+K]: full_empty_logic == 1'b1;
+		during[t, t+K]: (consistent_valid_flags_1 && consistent_valid_flags_2) == 1'b1;
+    
+		during[t, t+K]: (no_speculative_head_1 && no_speculative_head_2) == 1'b1;
 
-    during[t, t+K]: consistent_rob_valid_flags == 1'b1;
+		during[t, t+K]: (no_speculative_commit_1 && no_speculative_commit_2) == 1'b1;
+		
+	        during[t, t+K]: (lcam_ldq_idx_valid_1 && lcam_ldq_idx_valid_2 && lcam_stq_idx_valid_1 && lcam_stq_idx_valid_2) == 1'b1;
+	        
+	        during[t, t+K]: (ldq_consistent_rob_idx_1 && ldq_consistent_rob_idx_2 && stq_consistent_rob_idx_1 && stq_consistent_rob_idx_2) == 1'b1;
+	         
+	        during[t, t+K]: (consistent_stq_committed_1 && consistent_stq_committed_2) == 1'b1;
+    
+		during[t, t+K]: (committed_stores_not_speculative_1 && committed_stores_not_speculative_2) == 1'b1;
+		
+		during[t, t+K]: (!speculative_store_rpq_1 && !speculative_store_rpq_2) == 1'b1;
+    
+   		during[t, t+K]: (!speculative_store_s1_s2_1 && !speculative_store_s1_s2_2) == 1'b1;
 
-    during[t, t+K]: no_speculative_commit == 1'b1;
+		during[t, t+K]: (fpiu_BranchKillableQueue_1_not_committed_1 && fpiu_BranchKillableQueue_1_not_committed_2) == 1'b1;
+		
+		during[t, t+K]: (fdivsqrt_valid_consistency_1 && fdivsqrt_valid_consistency_2) == 1'b1;
+		
+		during[t, t+K]: (div_state_1 && div_state_2) == 1'b1;
+		
+		during[t, t+K]: (ldq_entries_not_using_stq_1 && ldq_entries_not_using_stq_2 && stq_entries_not_using_ldq_1 && stq_entries_not_using_ldq_2) == 1'b1;
+		
+		during[t, t+K]: (ROB_uops_equal_STQ_1 && ROB_uops_equal_STQ_2 && ROB_uops_equal_LDQ_1 && ROB_uops_equal_LDQ_2 && STQ_uops_equals_ROB_1 && STQ_uops_equals_ROB_2 && LDQ_uops_equals_ROB_1 && LDQ_uops_equals_ROB_2) == 1'b1;
+		
+		//during[t, t+K]: com_mispred_kills_root == 1'b1;
 
-    /*during[t, t+K]: com_mispred_kills_root == 1'b1;
+		//during[t, t+K]: enqueue_uncom_br_tags == 1'b1;
 
-    during[t, t+K]: enqueue_uncom_br_tags == 1'b1;
+		//during[t, t+K]: root_br_mispred == 1'b1;
 
-    during[t, t+K]: root_br_mispred == 1'b1;
+		during[t, t+K]: (valid_issue_slots_1 && valid_mispred_idx_1 && valid_iregister_read_1 && valid_issue_slots_2 && valid_mispred_idx_2 && valid_iregister_read_2) == 1'b1;
+    
+		//during[t, t+K]: addr_index_in_bounds == 1'b1;
 
-    during[t, t+K]: valid_br_tag_buffers == 1'b1;
+		during[t, t+K]: br_tag_protection == 1'b1;
+		
+	    	during[t, t+K]: consistent_uncommittable_masks == 1'b1;
+	    	
+	    	during[t, t+K]: (BranchKillableQueue_empty_1 && BranchKillableQueue_empty_2) == 1'b1;
 
-    during[t, t+K]: addr_index_in_bounds == 1'b1;
+	    	during[t, t+K]: (BranchKillableQueue_pointers_valid_1 && BranchKillableQueue_pointers_valid_2) == 1'b1;
+	    	  
+		//during[t, t+K]: (bkq_jmp_rob_consistency_1 && bkq_jmp_rob_consistency_2 && bkq_fp_rob_consistency_1 && bkq_fp_rob_consistency_2 && bkq_fp_1_rob_consistency_1 && bkq_fp_1_rob_consistency_2) == 1'b1;
+	    	
+    		during[t, t+K]: (buffers_equal_ROB_1 && buffers_equal_ROB_2) == 1'b1;
+    		
+    		during[t, t+K]: (unique_stq_idx_1 && unique_stq_idx_2) == 1'b1;
+    		
+	        during[t, t+K]: (stdf_clr_bsy_uses_stq_1 && stdf_clr_bsy_uses_stq_2) == 1'b1;
+	        	   
+		during[t, t+K]: (prevent_overwriting_valid_entries_1 && prevent_overwriting_valid_entries_2) == 1'b1;
+	    	
+		//excluded attacks
 
-    during[t, t+K]: br_tag_protection == 1'b1;*/
+		during[t, t+K]: soc1/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid == soc2/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid;
 
-    //excluded attacks
+		during[t, t+K]: soc1/core/ll_wbarb/io_in_0_valid == soc2/core/ll_wbarb/io_in_0_valid;
 
-    during[t, t+K]: soc1/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid == soc2/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid;
+		during[t, t+K]: soc1/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid == soc2/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid;
 
-    during[t, t+K]: soc1/core/ll_wbarb/io_in_0_valid == soc2/core/ll_wbarb/io_in_0_valid;
+		during[t, t+K]: soc1/core/fp_pipeline/ll_wbarb/io_in_0_valid == soc2/core/fp_pipeline/ll_wbarb/io_in_0_valid;
 
-    during[t, t+K]: soc1/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid == soc2/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid;
+		during[t, t+K]: soc1/core/csr_exe_unit/alu_io_resp_valid == soc2/core/csr_exe_unit/alu_io_resp_valid;
 
-    during[t, t+K]: soc1/core/fp_pipeline/ll_wbarb/io_in_0_valid == soc2/core/fp_pipeline/ll_wbarb/io_in_0_valid;
+		during[t, t+K]: cache_resp_equal == 1'b1;
 
-    during[t, t+K]: soc1/core/csr_exe_unit/alu_io_resp_valid == soc2/core/csr_exe_unit/alu_io_resp_valid;
+		during[t, t+K]: uncache_resp_equal == 1'b1;
 
-    during[t, t+K]: cache_resp_equal == 1'b1;
+		during[t, t+K]: wb_forward_valid_equal == 1'b1;
 
-    during[t, t+K]: uncache_resp_equal == 1'b1;
+		during[t, t+K]: dmem_resp_fired_equal == 1'b1;
 
-    during[t, t+K]: wb_forward_valid_equal == 1'b1;
+		during[t, t+K]: mshrs_resp_arb_valid_equal == 1'b1;
 
-    during[t, t+K]: dmem_resp_fired_equal == 1'b1;
-
-    during[t, t+K]: mshrs_resp_arb_valid_equal == 1'b1;
-
-    during[t, t+K]: dis_hazards_equal == 1'b1;
+		during[t, t+K]: dis_hazards_equal == 1'b1;
+		
+		//port contention between stores and fp_stores with static priority
+		during[t, t+K]: soc1/lsu/io_core_fp_stdata_ready == soc2/lsu/io_core_fp_stdata_ready;
+		
+		//port contention in jmp_unit between alu and imul (static priority)
+		during[t, t+K]: soc1/core/jmp_unit/alu_io_resp_valid == soc2/core/jmp_unit/alu_io_resp_valid;
+		
+		//port contention on LSU port to memory (static priority)
+		during[t, t+K]: soc1/lsu/fired_load_incoming_0 == soc2/lsu/fired_load_incoming_0 &&
+				soc1/lsu/fired_stad_incoming_0 == soc2/lsu/fired_stad_incoming_0 &&
+				soc1/lsu/fired_sta_incoming_0 == soc2/lsu/fired_sta_incoming_0 &&
+				soc1/lsu/fired_std_incoming_0 == soc2/lsu/fired_std_incoming_0 &&
+				soc1/lsu/fired_stdf_incoming == soc2/lsu/fired_stdf_incoming &&
+				soc1/lsu/fired_sfence_0 == soc2/lsu/fired_sfence_0 &&
+				soc1/lsu/fired_release_0 == soc2/lsu/fired_release_0 &&
+				soc1/lsu/fired_load_retry_0 == soc2/lsu/fired_load_retry_0 &&
+				soc1/lsu/fired_sta_retry_0 == soc2/lsu/fired_sta_retry_0 &&
+				soc1/lsu/will_fire_store_commit_0 == soc2/lsu/will_fire_store_commit_0 &&
+				soc1/lsu/fired_load_wakeup_0 == soc2/lsu/fired_load_wakeup_0 &&
+				soc1/lsu/will_fire_hella_incoming_0 == soc2/lsu/will_fire_hella_incoming_0 &&
+				soc1/lsu/will_fire_hella_wakeup_0 == soc2/lsu/will_fire_hella_wakeup_0
+				;
+				
+		//fixed priority arbitration for output of BranchKillableQueues because of "flow queue" behaviour (if queue empty, input can directly go to output)
+		during[t, t+K]: soc1/core/jmp_unit/BranchKillableQueue/io_empty == soc2/core/jmp_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty;
 
 	prove:
 		at t+K: lAlert == 1'b0 /*&& lAlert_earlyAlarm == 1'b0*/;
+
+end property;
+
+property UPEC_boom_equal_mispredicts;
+	dependencies: no_reset, br_tag_in_bounds;
+
+	assume:
+		during[t, t+N]: blackboxing;
+
+		during[t, t+N]: secret_data_protected;
+
+		at t: state_equivalence;
+
+		at t: init_mispred_signals;
+
+		during[t, t+N]: microequivalence == 1'b1;
+
+		during[t, t+N]: soc1/core/csr/reg_wfi == soc2/core/csr/reg_wfi;
+
+		during[t, t+N]: csr_insn_cease_equal == 1'b1;
+
+		during[t, t+N]: st_dep_mask_consistency == 1'b1;
+
+		//during[t, t+N]: consistent_lsu_rob_idx == 1'b1;
+
+    		//during[t, t+N]: rob_idx_correctly_set == 1'b1;
+
+		during[t, t+N]: (consistent_branch_masks_1 && consistent_branch_masks_2) == 1'b1;
+
+		during[t, t+N]: (consistent_buffer_br_masks_1 && consistent_buffer_br_masks_2) == 1'b1;
+
+		during[t, t+N]: (consistent_tail_rollback_1 && consistent_tail_rollback_2) == 1'b1;
+
+		during[t, t+N]: (ldq_check_invalidated_entries_1 && ldq_check_invalidated_entries_2 && stq_check_invalidated_entries_1 && stq_check_invalidated_entries_2) == 1'b1;
+
+		during[t, t+N]: (full_empty_logic_1 && full_empty_logic_2 && empty_logic_1 && empty_logic_2 && full_logic_1 && full_logic_2) == 1'b1;
+
+		during[t, t+N]: (consistent_valid_flags_1 && consistent_valid_flags_2) == 1'b1;
+    
+		during[t, t+N]: (no_speculative_head_1 && no_speculative_head_2) == 1'b1;
+
+		during[t, t+N]: (no_speculative_commit_1 && no_speculative_commit_2) == 1'b1;
+		
+	        during[t, t+N]: (lcam_ldq_idx_valid_1 && lcam_ldq_idx_valid_2 && lcam_stq_idx_valid_1 && lcam_stq_idx_valid_2) == 1'b1;
+	        
+	        during[t, t+N]: (ldq_consistent_rob_idx_1 && ldq_consistent_rob_idx_2 && stq_consistent_rob_idx_1 && stq_consistent_rob_idx_2) == 1'b1;
+	         
+	        during[t, t+N]: (consistent_stq_committed_1 && consistent_stq_committed_2) == 1'b1;
+    
+		during[t, t+N]: (committed_stores_not_speculative_1 && committed_stores_not_speculative_2) == 1'b1;
+		
+		during[t, t+N]: (!speculative_store_rpq_1 && !speculative_store_rpq_2) == 1'b1;
+    
+   		during[t, t+N]: (!speculative_store_s1_s2_1 && !speculative_store_s1_s2_2) == 1'b1;
+
+		during[t, t+N]: (fpiu_BranchKillableQueue_1_not_committed_1 && fpiu_BranchKillableQueue_1_not_committed_2) == 1'b1;
+		
+		during[t, t+N]: (fdivsqrt_valid_consistency_1 && fdivsqrt_valid_consistency_2) == 1'b1;
+		
+		during[t, t+N]: (div_state_1 && div_state_2) == 1'b1;
+		
+		during[t, t+N]: (ldq_entries_not_using_stq_1 && ldq_entries_not_using_stq_2 && stq_entries_not_using_ldq_1 && stq_entries_not_using_ldq_2) == 1'b1;
+		
+		during[t, t+N]: (ROB_uops_equal_STQ_1 && ROB_uops_equal_STQ_2 && ROB_uops_equal_LDQ_1 && ROB_uops_equal_LDQ_2 && STQ_uops_equals_ROB_1 && STQ_uops_equals_ROB_2 && LDQ_uops_equals_ROB_1 && LDQ_uops_equals_ROB_2) == 1'b1;
+		
+		//during[t, t+N]: com_mispred_kills_root == 1'b1;
+
+		//during[t, t+N]: enqueue_uncom_br_tags == 1'b1;
+
+		//during[t, t+N]: root_br_mispred == 1'b1;
+
+		during[t, t+N]: (valid_issue_slots_1 && valid_mispred_idx_1 && valid_iregister_read_1 && valid_issue_slots_2 && valid_mispred_idx_2 && valid_iregister_read_2) == 1'b1;
+    
+		//during[t, t+N]: addr_index_in_bounds == 1'b1;
+
+		during[t, t+N]: br_tag_protection == 1'b1;
+		
+	    	during[t, t+N]: consistent_uncommittable_masks == 1'b1;
+	    	
+	    	during[t, t+N]: (BranchKillableQueue_empty_1 && BranchKillableQueue_empty_2) == 1'b1;
+	    	
+	    	during[t, t+N]: (BranchKillableQueue_pointers_valid_1 && BranchKillableQueue_pointers_valid_2) == 1'b1;
+	    	
+		//during[t, t+N]: (bkq_jmp_rob_consistency_1 && bkq_jmp_rob_consistency_2 && bkq_fp_rob_consistency_1 && bkq_fp_rob_consistency_2 && bkq_fp_1_rob_consistency_1 && bkq_fp_1_rob_consistency_2) == 1'b1;
+
+    		during[t, t+N]: (buffers_equal_ROB_1 && buffers_equal_ROB_2) == 1'b1;
+    		
+    		during[t, t+N]: (unique_stq_idx_1 && unique_stq_idx_2) == 1'b1;
+    		
+	        during[t, t+N]: (stdf_clr_bsy_uses_stq_1 && stdf_clr_bsy_uses_stq_2) == 1'b1;
+	        
+		during[t, t+N]: (prevent_overwriting_valid_entries_1 && prevent_overwriting_valid_entries_2) == 1'b1;
+
+		//excluded attacks
+
+		during[t, t+N]: soc1/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid == soc2/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid;
+
+		during[t, t+N]: soc1/core/ll_wbarb/io_in_0_valid == soc2/core/ll_wbarb/io_in_0_valid;
+
+		during[t, t+N]: soc1/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid == soc2/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid;
+
+		during[t, t+K]: soc1/core/fp_pipeline/ll_wbarb/io_in_0_valid == soc2/core/fp_pipeline/ll_wbarb/io_in_0_valid;
+
+		during[t, t+N]: soc1/core/csr_exe_unit/alu_io_resp_valid == soc2/core/csr_exe_unit/alu_io_resp_valid;
+
+		during[t, t+N]: cache_resp_equal == 1'b1;
+
+		during[t, t+N]: uncache_resp_equal == 1'b1;
+
+		during[t, t+N]: wb_forward_valid_equal == 1'b1;
+
+		during[t, t+N]: dmem_resp_fired_equal == 1'b1;
+
+		during[t, t+N]: mshrs_resp_arb_valid_equal == 1'b1;
+
+		during[t, t+N]: dis_hazards_equal == 1'b1;
+		
+		//port contention between stores and fp_stores with static priority
+		during[t, t+N]: soc1/lsu/io_core_fp_stdata_ready == soc2/lsu/io_core_fp_stdata_ready;
+		
+		//port contention in jmp_unit between alu and imul (static priority)
+		during[t, t+N]: soc1/core/jmp_unit/alu_io_resp_valid == soc2/core/jmp_unit/alu_io_resp_valid;
+		
+		//port contention on LSU port to memory (static priority)
+		during[t, t+N]: soc1/lsu/fired_load_incoming_0 == soc2/lsu/fired_load_incoming_0 &&
+				soc1/lsu/fired_stad_incoming_0 == soc2/lsu/fired_stad_incoming_0 &&
+				soc1/lsu/fired_sta_incoming_0 == soc2/lsu/fired_sta_incoming_0 &&
+				soc1/lsu/fired_std_incoming_0 == soc2/lsu/fired_std_incoming_0 &&
+				soc1/lsu/fired_stdf_incoming == soc2/lsu/fired_stdf_incoming &&
+				soc1/lsu/fired_sfence_0 == soc2/lsu/fired_sfence_0 &&
+				soc1/lsu/fired_release_0 == soc2/lsu/fired_release_0 &&
+				soc1/lsu/fired_load_retry_0 == soc2/lsu/fired_load_retry_0 &&
+				soc1/lsu/fired_sta_retry_0 == soc2/lsu/fired_sta_retry_0 &&
+				soc1/lsu/will_fire_store_commit_0 == soc2/lsu/will_fire_store_commit_0 &&
+				soc1/lsu/fired_load_wakeup_0 == soc2/lsu/fired_load_wakeup_0 &&
+				soc1/lsu/will_fire_hella_incoming_0 == soc2/lsu/will_fire_hella_incoming_0 &&
+				soc1/lsu/will_fire_hella_wakeup_0 == soc2/lsu/will_fire_hella_wakeup_0
+				;
+		
+		//fixed priority arbitration for output of BranchKillableQueues because of "flow queue" behaviour (if queue empty, input can directly go to output)
+		during[t, t+N]: soc1/core/jmp_unit/BranchKillableQueue/io_empty == soc2/core/jmp_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty;
+		
+		during[t, t+N]: equal_mispredicts;
+
+	prove:
+		at t+N: lAlert == 1'b0 /*&& lAlert_earlyAlarm == 1'b0*/;
+
+end property;
+
+macro integer M := 4; end macro;
+
+property L_alerts_from_mispredict;
+	dependencies: no_reset, br_tag_in_bounds;
+
+	assume:
+		during[t, t+M]: blackboxing;
+
+		during[t, t+M]: secret_data_protected;
+
+		at t: state_equivalence_branch_mispredict_excluded;
+
+		at t: init_mispred_signals;
+
+		during[t, t+M]: microequivalence == 1'b1;
+		
+		during[t, t+M]: soc1/core/csr/reg_wfi == soc2/core/csr/reg_wfi;
+
+		during[t, t+M]: csr_insn_cease_equal == 1'b1;
+
+		during[t, t+M]: st_dep_mask_consistency == 1'b1;
+
+		//during[t, t+M]: consistent_lsu_rob_idx == 1'b1;
+
+    		//during[t, t+M]: rob_idx_correctly_set == 1'b1;
+
+		during[t, t+M]: (consistent_branch_masks_1 && consistent_branch_masks_2) == 1'b1;
+
+		during[t, t+M]: (consistent_buffer_br_masks_1 && consistent_buffer_br_masks_2) == 1'b1;
+
+		during[t, t+M]: (consistent_tail_rollback_1 && consistent_tail_rollback_2) == 1'b1;
+
+		during[t, t+M]: (ldq_check_invalidated_entries_1 && ldq_check_invalidated_entries_2 && stq_check_invalidated_entries_1 && stq_check_invalidated_entries_2) == 1'b1;
+
+		during[t, t+M]: (full_empty_logic_1 && full_empty_logic_2 && empty_logic_1 && empty_logic_2 && full_logic_1 && full_logic_2) == 1'b1;
+
+		during[t, t+M]: (consistent_valid_flags_1 && consistent_valid_flags_2) == 1'b1;
+    
+		during[t, t+M]: (no_speculative_head_1 && no_speculative_head_2) == 1'b1;
+
+		during[t, t+M]: (no_speculative_commit_1 && no_speculative_commit_2) == 1'b1;
+		
+	        during[t, t+M]: (lcam_ldq_idx_valid_1 && lcam_ldq_idx_valid_2 && lcam_stq_idx_valid_1 && lcam_stq_idx_valid_2) == 1'b1;
+	        
+	        during[t, t+M]: (ldq_consistent_rob_idx_1 && ldq_consistent_rob_idx_2 && stq_consistent_rob_idx_1 && stq_consistent_rob_idx_2) == 1'b1;
+	         
+	        during[t, t+M]: (consistent_stq_committed_1 && consistent_stq_committed_2) == 1'b1;
+    
+		during[t, t+M]: (committed_stores_not_speculative_1 && committed_stores_not_speculative_2) == 1'b1;
+		
+		during[t, t+M]: (!speculative_store_rpq_1 && !speculative_store_rpq_2) == 1'b1;
+    
+   		during[t, t+M]: (!speculative_store_s1_s2_1 && !speculative_store_s1_s2_2) == 1'b1;
+
+		during[t, t+M]: (fpiu_BranchKillableQueue_1_not_committed_1 && fpiu_BranchKillableQueue_1_not_committed_2) == 1'b1;
+		
+		during[t, t+M]: (fdivsqrt_valid_consistency_1 && fdivsqrt_valid_consistency_2) == 1'b1;
+		
+		during[t, t+M]: (div_state_1 && div_state_2) == 1'b1;
+		
+		during[t, t+M]: (ldq_entries_not_using_stq_1 && ldq_entries_not_using_stq_2 && stq_entries_not_using_ldq_1 && stq_entries_not_using_ldq_2) == 1'b1;
+		
+		during[t, t+M]: (ROB_uops_equal_STQ_1 && ROB_uops_equal_STQ_2 && ROB_uops_equal_LDQ_1 && ROB_uops_equal_LDQ_2 && STQ_uops_equals_ROB_1 && STQ_uops_equals_ROB_2 && LDQ_uops_equals_ROB_1 && LDQ_uops_equals_ROB_2) == 1'b1;
+		
+		during[t, t+M]: (prevent_overwriting_valid_entries_1 && prevent_overwriting_valid_entries_2) == 1'b1;
+		
+		//during[t, t+M]: com_mispred_kills_root == 1'b1;
+
+		//during[t, t+M]: enqueue_uncom_br_tags == 1'b1;
+
+		//during[t, t+M]: root_br_mispred == 1'b1;
+
+		//during[t, t+M]: (bkq_jmp_rob_consistency_1 && bkq_jmp_rob_consistency_2 && bkq_fp_rob_consistency_1 && bkq_fp_rob_consistency_2 && bkq_fp_1_rob_consistency_1 && bkq_fp_1_rob_consistency_2) == 1'b1;
+    
+    		during[t, t+M]: (buffers_equal_ROB_1 && buffers_equal_ROB_2) == 1'b1;
+    		
+    		during[t, t+M]: (unique_stq_idx_1 && unique_stq_idx_2) == 1'b1;
+    		
+	        during[t, t+M]: (stdf_clr_bsy_uses_stq_1 && stdf_clr_bsy_uses_stq_2) == 1'b1;
+    		
+		//during[t, t+M]: addr_index_in_bounds == 1'b1;
+
+		during[t, t+M]: br_tag_protection == 1'b1;
+		
+	    	during[t, t+M]: consistent_uncommittable_masks == 1'b1;
+	    	
+	    	during[t, t+M]: (BranchKillableQueue_empty_1 && BranchKillableQueue_empty_2) == 1'b1;
+	    	
+	    	during[t, t+M]: (BranchKillableQueue_pointers_valid_1 && BranchKillableQueue_pointers_valid_2) == 1'b1;
+	    	
+		during[t, t+M]: (valid_issue_slots_1 && valid_mispred_idx_1 && valid_iregister_read_1 && valid_issue_slots_2 && valid_mispred_idx_2 && valid_iregister_read_2) == 1'b1;
+		
+	    	during[t, t+M]: (fdivsqrt_consistency_1 && fdivsqrt_consistency_2) == 1'b1;
+	    	
+	    	//use chisel assertion from fdiv.scala line 134
+	    	during[t, t+M]: (soc1/core/fp_pipeline/fpiu_unit/fdivsqrt/_T_135 && soc2/core/fp_pipeline/fpiu_unit/fdivsqrt/_T_135) == 1'b1;
+
+		//excluded attacks
+
+		during[t, t+M]: soc1/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid == soc2/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid;
+
+		during[t, t+M]: soc1/core/ll_wbarb/io_in_0_valid == soc2/core/ll_wbarb/io_in_0_valid;
+
+		during[t, t+M]: soc1/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid == soc2/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid;
+
+		during[t, t+M]: soc1/core/fp_pipeline/ll_wbarb/io_in_0_valid == soc2/core/fp_pipeline/ll_wbarb/io_in_0_valid;
+
+		during[t, t+M]: soc1/core/csr_exe_unit/alu_io_resp_valid == soc2/core/csr_exe_unit/alu_io_resp_valid;
+
+		during[t, t+M]: cache_resp_equal == 1'b1;
+
+		during[t, t+M]: uncache_resp_equal == 1'b1;
+
+		during[t, t+M]: wb_forward_valid_equal == 1'b1;
+
+		during[t, t+M]: dmem_resp_fired_equal == 1'b1;
+
+		during[t, t+M]: mshrs_resp_arb_valid_equal == 1'b1;
+
+		during[t, t+M]: dis_hazards_equal == 1'b1;
+		
+		//port contention between stores and fp_stores with static priority
+		during[t, t+M]: soc1/lsu/io_core_fp_stdata_ready == soc2/lsu/io_core_fp_stdata_ready;
+		
+		//port contention in jmp_unit between alu and imul (static priority)
+		during[t, t+M]: soc1/core/jmp_unit/alu_io_resp_valid == soc2/core/jmp_unit/alu_io_resp_valid;
+		
+		//port contention on LSU port to memory (static priority)
+		during[t, t+M]: soc1/lsu/fired_load_incoming_0 == soc2/lsu/fired_load_incoming_0 &&
+				soc1/lsu/fired_stad_incoming_0 == soc2/lsu/fired_stad_incoming_0 &&
+				soc1/lsu/fired_sta_incoming_0 == soc2/lsu/fired_sta_incoming_0 &&
+				soc1/lsu/fired_std_incoming_0 == soc2/lsu/fired_std_incoming_0 &&
+				soc1/lsu/fired_stdf_incoming == soc2/lsu/fired_stdf_incoming &&
+				soc1/lsu/fired_sfence_0 == soc2/lsu/fired_sfence_0 &&
+				soc1/lsu/fired_release_0 == soc2/lsu/fired_release_0 &&
+				soc1/lsu/fired_load_retry_0 == soc2/lsu/fired_load_retry_0 &&
+				soc1/lsu/fired_sta_retry_0 == soc2/lsu/fired_sta_retry_0 &&
+				soc1/lsu/will_fire_store_commit_0 == soc2/lsu/will_fire_store_commit_0 &&
+				soc1/lsu/fired_load_wakeup_0 == soc2/lsu/fired_load_wakeup_0 &&
+				soc1/lsu/will_fire_hella_incoming_0 == soc2/lsu/will_fire_hella_incoming_0 &&
+				soc1/lsu/will_fire_hella_wakeup_0 == soc2/lsu/will_fire_hella_wakeup_0
+				;
+				
+		//fixed priority arbitration for output of BranchKillableQueues because of "flow queue" behaviour (if queue empty, input can directly go to output)
+		during[t, t+M]: soc1/core/jmp_unit/BranchKillableQueue/io_empty == soc2/core/jmp_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty;
+		
+		//fixed "priority" in LSU for handling dmem response
+		during[t, t+M]: soc1/lsu/io_dmem_resp_0_bits_uop_uses_ldq == soc2/lsu/io_dmem_resp_0_bits_uop_uses_ldq && soc1/lsu/io_dmem_resp_0_bits_uop_uses_stq == soc2/lsu/io_dmem_resp_0_bits_uop_uses_stq;
+		
+		
+		//fixed priority arbitration for replay arbiter in mshrs
+		during[t, t+M]: soc1/dcache/mshrs/replay_arb/io_in_0_valid == soc2/dcache/mshrs/replay_arb/io_in_0_valid;
+		during[t, t+M]: soc1/dcache/mshrs/replay_arb/io_in_1_valid == soc2/dcache/mshrs/replay_arb/io_in_1_valid;
+		
+		//fixed priority arbitration for dataRead arbiter in dcache
+		during[t, t+M]: soc1/dcache/dataReadArb/io_in_0_valid == soc2/dcache/dataReadArb/io_in_0_valid;
+		during[t, t+M]: soc1/dcache/dataReadArb/io_in_1_valid == soc2/dcache/dataReadArb/io_in_1_valid;
+		during[t, t+M]: soc1/dcache/dataReadArb/io_in_2_valid == soc2/dcache/dataReadArb/io_in_2_valid;
+		
+		//fixed priority arbitration for metaRead arbiter in dcache
+		during[t, t+M]: soc1/dcache/metaReadArb/io_in_0_valid == soc2/dcache/metaReadArb/io_in_0_valid;
+		during[t, t+M]: soc1/dcache/metaReadArb/io_in_1_valid == soc2/dcache/metaReadArb/io_in_1_valid;
+		during[t, t+M]: soc1/dcache/metaReadArb/io_in_2_valid == soc2/dcache/metaReadArb/io_in_2_valid;
+		during[t, t+M]: soc1/dcache/metaReadArb/io_in_3_valid == soc2/dcache/metaReadArb/io_in_3_valid;
+		during[t, t+M]: soc1/dcache/metaReadArb/io_in_4_valid == soc2/dcache/metaReadArb/io_in_4_valid;
+		
+		//if mispredict rob_idx is committable, mispredict signals have to be equal, else they can differ
+		during[t, t+M]: uncom_branch_resolution == 1'b1;
+
+	prove:
+
+		at t+M: lAlert == 1'b0 /*&& lAlert_earlyAlarm == 1'b0*/;
+
+
+end property;
+
+property UPEC_symbolic_commitment;
+	dependencies: no_reset, br_tag_in_bounds;
+
+	assume:
+		during[t, t+O]: blackboxing;
+
+		during[t, t+O]: secret_data_protected;
+
+		at t: state_equivalence_branch_mispredict_excluded;
+
+		at t: init_mispred_signals;
+
+		during[t, t+O]: microequivalence == 1'b1;
+		
+		during[t, t+O]: soc1/core/csr/reg_wfi == soc2/core/csr/reg_wfi;
+
+		during[t, t+O]: csr_insn_cease_equal == 1'b1;
+
+		during[t, t+O]: st_dep_mask_consistency == 1'b1;
+
+		//during[t, t+O]: consistent_lsu_rob_idx == 1'b1;
+
+    		//during[t, t+O]: rob_idx_correctly_set == 1'b1;
+
+		during[t, t+O]: (consistent_branch_masks_1 && consistent_branch_masks_2) == 1'b1;
+
+		during[t, t+O]: (consistent_buffer_br_masks_1 && consistent_buffer_br_masks_2) == 1'b1;
+
+		during[t, t+O]: (consistent_tail_rollback_1 && consistent_tail_rollback_2) == 1'b1;
+
+		during[t, t+O]: (ldq_check_invalidated_entries_1 && ldq_check_invalidated_entries_2 && stq_check_invalidated_entries_1 && stq_check_invalidated_entries_2) == 1'b1;
+
+		during[t, t+O]: (full_empty_logic_1 && full_empty_logic_2 && empty_logic_1 && empty_logic_2 && full_logic_1 && full_logic_2) == 1'b1;
+
+		during[t, t+O]: (consistent_valid_flags_1 && consistent_valid_flags_2) == 1'b1;
+    
+		during[t, t+O]: (no_speculative_head_1 && no_speculative_head_2) == 1'b1;
+
+		during[t, t+O]: (no_speculative_commit_1 && no_speculative_commit_2) == 1'b1;
+		
+	        during[t, t+O]: (lcam_ldq_idx_valid_1 && lcam_ldq_idx_valid_2 && lcam_stq_idx_valid_1 && lcam_stq_idx_valid_2) == 1'b1;
+	        
+	        during[t, t+O]: (ldq_consistent_rob_idx_1 && ldq_consistent_rob_idx_2 && stq_consistent_rob_idx_1 && stq_consistent_rob_idx_2) == 1'b1;
+	         
+	        during[t, t+O]: (consistent_stq_committed_1 && consistent_stq_committed_2) == 1'b1;
+    
+		during[t, t+O]: (committed_stores_not_speculative_1 && committed_stores_not_speculative_2) == 1'b1;
+		
+		during[t, t+O]: (!speculative_store_rpq_1 && !speculative_store_rpq_2) == 1'b1;
+    
+   		during[t, t+O]: (!speculative_store_s1_s2_1 && !speculative_store_s1_s2_2) == 1'b1;
+
+		during[t, t+O]: (fpiu_BranchKillableQueue_1_not_committed_1 && fpiu_BranchKillableQueue_1_not_committed_2) == 1'b1;
+		
+		during[t, t+O]: (fdivsqrt_valid_consistency_1 && fdivsqrt_valid_consistency_2) == 1'b1;
+		
+		during[t, t+O]: (div_state_1 && div_state_2) == 1'b1;
+		
+		during[t, t+O]: (ldq_entries_not_using_stq_1 && ldq_entries_not_using_stq_2 && stq_entries_not_using_ldq_1 && stq_entries_not_using_ldq_2) == 1'b1;
+		
+		during[t, t+O]: (ROB_uops_equal_STQ_1 && ROB_uops_equal_STQ_2 && ROB_uops_equal_LDQ_1 && ROB_uops_equal_LDQ_2 && STQ_uops_equals_ROB_1 && STQ_uops_equals_ROB_2 && LDQ_uops_equals_ROB_1 && LDQ_uops_equals_ROB_2) == 1'b1;
+		
+		during[t, t+O]: (prevent_overwriting_valid_entries_1 && prevent_overwriting_valid_entries_2) == 1'b1;
+		
+		//during[t, t+O]: com_mispred_kills_root == 1'b1;
+
+		//during[t, t+O]: enqueue_uncom_br_tags == 1'b1;
+
+		//during[t, t+O]: root_br_mispred == 1'b1;
+
+		//during[t, t+O]: (bkq_jmp_rob_consistency_1 && bkq_jmp_rob_consistency_2 && bkq_fp_rob_consistency_1 && bkq_fp_rob_consistency_2 && bkq_fp_1_rob_consistency_1 && bkq_fp_1_rob_consistency_2) == 1'b1;
+    
+    		during[t, t+O]: (buffers_equal_ROB_1 && buffers_equal_ROB_2) == 1'b1;
+    		
+    		during[t, t+O]: (unique_stq_idx_1 && unique_stq_idx_2) == 1'b1;
+    		
+	        during[t, t+O]: (stdf_clr_bsy_uses_stq_1 && stdf_clr_bsy_uses_stq_2) == 1'b1;
+    		
+		//during[t, t+O]: addr_index_in_bounds == 1'b1;
+
+		during[t, t+O]: br_tag_protection == 1'b1;
+		
+	    	during[t, t+O]: consistent_uncommittable_masks == 1'b1;
+	    	
+	    	during[t, t+O]: (BranchKillableQueue_empty_1 && BranchKillableQueue_empty_2) == 1'b1;
+	    	
+	    	during[t, t+O]: (BranchKillableQueue_pointers_valid_1 && BranchKillableQueue_pointers_valid_2) == 1'b1;
+	    	
+		during[t, t+O]: (valid_issue_slots_1 && valid_mispred_idx_1 && valid_iregister_read_1 && valid_issue_slots_2 && valid_mispred_idx_2 && valid_iregister_read_2) == 1'b1;
+		
+	    	during[t, t+O]: (fdivsqrt_consistency_1 && fdivsqrt_consistency_2) == 1'b1;
+	    	
+	    	//use chisel assertion from fdiv.scala line 134
+	    	during[t, t+O]: (soc1/core/fp_pipeline/fpiu_unit/fdivsqrt/_T_135 && soc2/core/fp_pipeline/fpiu_unit/fdivsqrt/_T_135) == 1'b1;
+
+		//excluded attacks
+
+		during[t, t+O]: soc1/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid == soc2/core/fp_pipeline/fpiu_unit/fpu_io_resp_valid;
+
+		during[t, t+O]: soc1/core/ll_wbarb/io_in_0_valid == soc2/core/ll_wbarb/io_in_0_valid;
+
+		during[t, t+O]: soc1/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid == soc2/core/fp_pipeline/fpiu_unit/Arbiter/io_in_0_valid;
+
+		during[t, t+O]: soc1/core/fp_pipeline/ll_wbarb/io_in_0_valid == soc2/core/fp_pipeline/ll_wbarb/io_in_0_valid;
+
+		during[t, t+O]: soc1/core/csr_exe_unit/alu_io_resp_valid == soc2/core/csr_exe_unit/alu_io_resp_valid;
+
+		during[t, t+O]: cache_resp_equal == 1'b1;
+
+		during[t, t+O]: uncache_resp_equal == 1'b1;
+
+		during[t, t+O]: wb_forward_valid_equal == 1'b1;
+
+		during[t, t+O]: dmem_resp_fired_equal == 1'b1;
+
+		during[t, t+O]: mshrs_resp_arb_valid_equal == 1'b1;
+
+		during[t, t+O]: dis_hazards_equal == 1'b1;
+		
+		//port contention between stores and fp_stores with static priority
+		during[t, t+O]: soc1/lsu/io_core_fp_stdata_ready == soc2/lsu/io_core_fp_stdata_ready;
+		
+		//port contention in jmp_unit between alu and imul (static priority)
+		during[t, t+O]: soc1/core/jmp_unit/alu_io_resp_valid == soc2/core/jmp_unit/alu_io_resp_valid;
+		
+		//port contention on LSU port to memory (static priority)
+		during[t, t+O]: soc1/lsu/fired_load_incoming_0 == soc2/lsu/fired_load_incoming_0 &&
+				soc1/lsu/fired_stad_incoming_0 == soc2/lsu/fired_stad_incoming_0 &&
+				soc1/lsu/fired_sta_incoming_0 == soc2/lsu/fired_sta_incoming_0 &&
+				soc1/lsu/fired_std_incoming_0 == soc2/lsu/fired_std_incoming_0 &&
+				soc1/lsu/fired_stdf_incoming == soc2/lsu/fired_stdf_incoming &&
+				soc1/lsu/fired_sfence_0 == soc2/lsu/fired_sfence_0 &&
+				soc1/lsu/fired_release_0 == soc2/lsu/fired_release_0 &&
+				soc1/lsu/fired_load_retry_0 == soc2/lsu/fired_load_retry_0 &&
+				soc1/lsu/fired_sta_retry_0 == soc2/lsu/fired_sta_retry_0 &&
+				soc1/lsu/will_fire_store_commit_0 == soc2/lsu/will_fire_store_commit_0 &&
+				soc1/lsu/fired_load_wakeup_0 == soc2/lsu/fired_load_wakeup_0 &&
+				soc1/lsu/will_fire_hella_incoming_0 == soc2/lsu/will_fire_hella_incoming_0 &&
+				soc1/lsu/will_fire_hella_wakeup_0 == soc2/lsu/will_fire_hella_wakeup_0
+				;
+				
+		//fixed priority arbitration for output of BranchKillableQueues because of "flow queue" behaviour (if queue empty, input can directly go to output)
+		during[t, t+O]: soc1/core/jmp_unit/BranchKillableQueue/io_empty == soc2/core/jmp_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue/io_empty &&
+				soc1/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty == soc2/core/fp_pipeline/fpiu_unit/BranchKillableQueue_1/io_empty;
+		
+		//fixed "priority" in LSU for handling dmem response
+		during[t, t+O]: soc1/lsu/io_dmem_resp_0_bits_uop_uses_ldq == soc2/lsu/io_dmem_resp_0_bits_uop_uses_ldq && soc1/lsu/io_dmem_resp_0_bits_uop_uses_stq == soc2/lsu/io_dmem_resp_0_bits_uop_uses_stq;
+		
+		
+		//fixed priority arbitration for replay arbiter in mshrs
+		during[t, t+O]: soc1/dcache/mshrs/replay_arb/io_in_0_valid == soc2/dcache/mshrs/replay_arb/io_in_0_valid;
+		during[t, t+O]: soc1/dcache/mshrs/replay_arb/io_in_1_valid == soc2/dcache/mshrs/replay_arb/io_in_1_valid;
+		
+		//fixed priority arbitration for dataRead arbiter in dcache
+		during[t, t+O]: soc1/dcache/dataReadArb/io_in_0_valid == soc2/dcache/dataReadArb/io_in_0_valid;
+		during[t, t+O]: soc1/dcache/dataReadArb/io_in_1_valid == soc2/dcache/dataReadArb/io_in_1_valid;
+		during[t, t+O]: soc1/dcache/dataReadArb/io_in_2_valid == soc2/dcache/dataReadArb/io_in_2_valid;
+		
+		//fixed priority arbitration for metaRead arbiter in dcache
+		during[t, t+O]: soc1/dcache/metaReadArb/io_in_0_valid == soc2/dcache/metaReadArb/io_in_0_valid;
+		during[t, t+O]: soc1/dcache/metaReadArb/io_in_1_valid == soc2/dcache/metaReadArb/io_in_1_valid;
+		during[t, t+O]: soc1/dcache/metaReadArb/io_in_2_valid == soc2/dcache/metaReadArb/io_in_2_valid;
+		during[t, t+O]: soc1/dcache/metaReadArb/io_in_3_valid == soc2/dcache/metaReadArb/io_in_3_valid;
+		during[t, t+O]: soc1/dcache/metaReadArb/io_in_4_valid == soc2/dcache/metaReadArb/io_in_4_valid;
+		
+		//if mispredict rob_idx is committable, mispredict signals have to be equal, else they can differ
+		during[t, t+O]: uncom_branch_resolution == 1'b1;
+
+
+		during[t, t+O]: (commit_index < 2);
+	prove:
+
+		//at t+O: lAlert == 1'b0 /*&& lAlert_earlyAlarm == 1'b0*/;
+		at t+O: (!(mispred_happened_1 && mispred_happened_2) && (!root_id_killed && !root_id_already_killed) && (ROB_commit_array_1[commit_index] != ROB_commit_array_2[commit_index])) == 1'b0;
 
 end property;

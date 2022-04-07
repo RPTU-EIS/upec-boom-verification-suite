@@ -1,4 +1,4 @@
-macro boolean state_equivalence :=
+macro boolean state_equivalence_branch_mispredict_excluded :=
   mem1/a_addr == mem2/a_addr &&
   mem1/a_param == mem2/a_param &&
   mem1/a_size == mem2/a_size &&
@@ -111,7 +111,7 @@ macro boolean state_equivalence :=
   soc1/core/b2_uop_rob_idx == soc2/core/b2_uop_rob_idx &&
   soc1/core/b2_uop_stq_idx == soc2/core/b2_uop_stq_idx &&
   soc1/core/brinfos_0_cfi_type == soc2/core/brinfos_0_cfi_type &&
-  soc1/core/brinfos_0_mispredict == soc2/core/brinfos_0_mispredict &&
+  //soc1/core/brinfos_0_mispredict == soc2/core/brinfos_0_mispredict &&
   soc1/core/brinfos_0_pc_sel == soc2/core/brinfos_0_pc_sel &&
   soc1/core/brinfos_0_taken == soc2/core/brinfos_0_taken &&
   soc1/core/brinfos_0_target_offset == soc2/core/brinfos_0_target_offset &&
@@ -126,7 +126,7 @@ macro boolean state_equivalence :=
   soc1/core/brinfos_0_uop_stq_idx == soc2/core/brinfos_0_uop_stq_idx &&
   soc1/core/brinfos_0_valid == soc2/core/brinfos_0_valid &&
   soc1/core/brinfos_1_cfi_type == soc2/core/brinfos_1_cfi_type &&
-  soc1/core/brinfos_1_mispredict == soc2/core/brinfos_1_mispredict &&
+  //soc1/core/brinfos_1_mispredict == soc2/core/brinfos_1_mispredict &&
   soc1/core/brinfos_1_pc_sel == soc2/core/brinfos_1_pc_sel &&
   soc1/core/brinfos_1_taken == soc2/core/brinfos_1_taken &&
   soc1/core/brinfos_1_target_offset == soc2/core/brinfos_1_target_offset &&

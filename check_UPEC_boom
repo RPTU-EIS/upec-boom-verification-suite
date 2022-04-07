@@ -1,3 +1,0 @@
-source run.tcl
-source pure_ipc.tcl
-check  {UPEC_boom}

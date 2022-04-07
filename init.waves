@@ -6,6 +6,8 @@ soc1/core/rob/io_rob_head_idx DEFAULT DEFAULT { false} { false}
 soc2/core/rob/io_rob_head_idx DEFAULT DEFAULT { false} { false}
 soc1/core/rob/io_rob_tail_idx DEFAULT DEFAULT { false} { false}
 soc2/core/rob/io_rob_tail_idx DEFAULT DEFAULT { false} { false}
+soc1/core/rob/io_rob_pnr_idx DEFAULT DEFAULT { false} { false}
+soc2/core/rob/io_rob_pnr_idx DEFAULT DEFAULT { false} { false}
 SEPARATOR_Separator NONE DEFAULT { false} { false}
 SEPARATOR_Separator NONE DEFAULT { false} { false}
 microequivalence DEFAULT DEFAULT { false} { false}
