@@ -11,10 +11,12 @@ A more detailed description of the employed formal verification technique can be
 
 [1] Fadiheh, M. R., Stoffel, D., Barrett, C., Mitra, S., & Kunz, W. (2019, March). Processor hardware security vulnerabilities and their detection by unique program execution checking. In 2019 Design, Automation & Test in Europe Conference & Exhibition (DATE) (pp. 994-999). IEEE.
 
-[2] Rahmani Fadiheh, M., Stoffel, D., Barrett, C., Mitra, S., & Kunz, W. (2018). Processor Hardware Security Vulnerabilities and their Detection by Unique Program Execution Checking. arXiv e-prints, arXiv-1812.
+[2] Fadiheh, M. R., Stoffel, D., Barrett, C., Mitra, S., & Kunz, W. (2018). Processor Hardware Security Vulnerabilities and their Detection by Unique Program Execution Checking. arXiv e-prints, arXiv-1812.
 ([Link](https://arxiv.org/pdf/1812.04975.pdf))
 
-[3]Fadiheh, M. R., Müller, J., Brinkmann, R., Mitra, S., Stoffel, D., & Kunz, W. (2020, July). A formal approach for detecting vulnerabilities to transient execution attacks in out-of-order processors. In 2020 57th ACM/IEEE Design Automation Conference (DAC) (pp. 1-6). IEEE.
+[3] Fadiheh, M. R., Müller, J., Brinkmann, R., Mitra, S., Stoffel, D., & Kunz, W. (2020, July). A formal approach for detecting vulnerabilities to transient execution attacks in out-of-order processors. In 2020 57th ACM/IEEE Design Automation Conference (DAC) (pp. 1-6). IEEE.
+
+[4] Fadiheh, M. R., Wezel, A., Müller, J., Bormann, J., Ray, S., Fung, J. M., Mitra, S., Stoffel, D., & Kunz, W. (2023, January). An Exhaustive Approach to Detecting Transient Execution Side Channels in RTL Designs of Processors, in IEEE Transactions on Computers, vol. 72, no. 1, pp. 222-235, 1 Jan. 2023, doi: 10.1109/TC.2022.3152666.
 
 ## Table of Contents
 
