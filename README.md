@@ -145,6 +145,44 @@ Based on this partitioning we make sure that the uncommittable SPI instructions 
 
 Implementing these conditions in a property language is straight-forward and only involves identifying the buffers containing tags and IDs of in-flight instructions. A template for applying UPEC to out-of-order processors using microequivalence is available in [Documentation/UPEC_OOO_Template.v](https://github.com/mofadiheh/upec-boom-verification-suite/blob/main/Documentation/UPEC_OOO_Template.v). It is used as a basis for developing the BOOM Verification suite.
 
+## UPEC Verification Methodology
+The above-mentioned microequivalence forms an invariant that prevents the majority of false counterexamples to the UPEC property. In [4], a verification methodology based on induction is described which uses the UPEC property with microequivalence to achieve an unbounded security guarantee. The methodology decomposes the global verification problem into several small and feasible proofs. The proof decomposition is based on the logical secret propagation scenarios which minimize runtime for each proof instance. However, in speculative execution processors like Boom, there are several propagation scenarios that are caused by speculative propagation of the secret to a variety of functional units and microarchitectural resources in the pipeline. Each of these propagation scenarios needs to be considered separately which leads to a high number of (relatively simple) proofs. To address this issue, an improved version of the inductive methodology is presented here which achieves the security guarantee with a smaller number of proofs.
+ 
+The UPEC inductive methodology consists of a base and a step. The base proof computes the set of all locations within the design that the secret can propagate to within a finite time window. The step proof ensures that no matter how long the secret stays in any of these locations, it cannot propagate further, establishing an unbounded proof. 
+
+The algorithm in [4] enumerates all the propagation scenarios for a given time window, i.e. all possible combinations of state variables that the secret can propagate to. The base proof then uses these collected propagation scenarios to decompose the proof for larger time windows. This leads to lower proof runtime for each proof, as the property time window grows larger. However, in designs similar to BOOM, speculative execution can create a prohibitively large number of different possibilities for secret propagation (propagation through different combinations of variables).
+Instead of decomposing the proof based on the propagation scenarios, we decompose the proof based on the state variable that the secret can propagate to. This means that each proof instance within the UPEC base checks whether or not the secret can propagate to a particular RTL register (word-level state variable). If there exists a propagation scenario in which the secret propagates to multiple state variables simultaneously, several proofs detect this scenario as each of the affected state variables has a separate proof. Although this means a propagation scenario is detected by multiple properties, the proof decomposition simultaneously checks for all the propagations that target the same variable, which in the end reduces the overall number of proofs.
+The base proof consists of the following steps: 
+* The initial location of the secret must be specified. This is typically a read buffer in data memory or data cache.
+* Based on structural analysis, the UPEC tool identifies alert candidates, i.e. all the state variables (RTL registers) that lie in the immediate fanout of the initial location of the secret, which means the secret can propagate to them in one clock cycle. 
+* For the time window [t, t+1], for each variable in alert candidates, a UPEC property (see [4]) is generated and proved by the solver which checks whether in the given time window the valuation of the state variable is equal between the two instances in the miter model. This shows whether the secret can propagate to the considered state variable.
+* Each failing UPEC property denotes a state variable to which the secret can propagate. These state variables are collected in a set, called the Propagation set.
+* We then proceed incrementally with bigger time windows, starting with k = 2:
+  * For time window [t, t+k], the UPEC tool identifies the new alert candidates by looking into the fanout of state variables that the secret can propagate to within the time window [t, t+k-1]. (The state variables which are added to the propagation set in the previous time window).
+  * A new alert candidate that is already in the propagation set is removed from the new candidates' list since we already know that secret can propagate to this variable.
+  * For each of the remaining new alert candidates a UPEC property is generated and proved which covers the time window [t, t+k].
+  * Once the proof results are collected, we increment k (k = k+1) and continue similarly. 
+  * The process stops when a time window is reached for which the tool produces no new alert candidates. This happens when a point is reached such that the secret propagation is blocked on each of the potential propagation paths (i.e. UPEC property for all alert candidates hold) and there is no new state variable that can be added to the propagation set.
+* When the base proof is done, the propagation set is computed which denotes the state variables that the secret can propagate to. We have also proven that secret cannot propagate out of this set at least for one clock cycle. If any of the architectural state variables appear in the propagation set, a leakage is detected.
+* We then proceed with the step proof: 
+  * Assuming V is the set of all state variables in the design, a UPEC property is generated: 
+
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Assume**:
+
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *during [t, t+2]*: $microequivalence$; 
+  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *at t*: $\forall v \in V$ and $v \notin Propagation$ $set$: $soc1.v == soc2.v$;
+  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *at t+1*: $\forall v \in V$ and $v \notin Propagation$ $set$: $soc1.v == soc2.v$;
+  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Prove**:
+
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *at t+2*: $\forall v \in V$ and $v \notin Propagation$ $set$: $soc1.v == soc2.v$;
+ 
+  * If the step property fails and the secret can propagate to a new variable, the new variable must be added to the propagation set and the step proof must be repeated with the new set.
+  * Similar to the base proof, if any of the architectural state variables appear in the propagation set, a leakage is detected.
+* The verification process finishes when the step property holds.
+
 ## BOOM
 The Berkeley Out-of-Order Machine (BOOM) is a synthesizable and parameterizable open-source RISC-V out-of-order core written in the Chisel hardware construction language and is developed by the UC Berkeley Architecture Research group.  
 The documentation for BOOM can be found here : [https://docs.boom-core.org/en/latest/index.html](https://docs.boom-core.org/en/latest/index.html)
