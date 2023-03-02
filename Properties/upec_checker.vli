@@ -37,9 +37,11 @@ end macro;
 
 
 macro boolean secret_load_speculative :=
-  ( soc1/dcache/io_lsu_resp_0_valid && soc2/dcache/io_lsu_resp_0_valid &&
-      soc1/dcache/io_lsu_resp_0_bits_data != soc2/dcache/io_lsu_resp_0_bits_data ) ?
-	soc1/dcache/s2_req_0_uop_br_mask != 12'h0 && soc2/dcache/s2_req_0_uop_br_mask != 12'h0 : true;
+  ( soc1.lsu.io_core_exe_0_iresp_bits_uop_rob_idx == soc2.lsu.io_core_exe_0_iresp_bits_uop_rob_idx &&
+    soc1.lsu.io_core_exe_0_iresp_bits_data != soc2.lsu.io_core_exe_0_iresp_bits_data ) ? 
+    // soc1.lsu.io_core_exe_0_iresp_bits_uop_rob_idx must be younger than root_id
+    (root_id < soc1.lsu.io_core_exe_0_iresp_bits_uop_rob_idx) ^ (root_id < soc1.core.rob.rob_head) ^ (soc1.lsu.io_core_exe_0_iresp_bits_uop_rob_idx < soc1.core.rob.rob_head)
+    : 1'b1
 end macro;
 
 
